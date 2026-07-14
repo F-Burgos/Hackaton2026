@@ -1,0 +1,12 @@
+# Local dataset artifacts
+hackaton/
+
+# Python/cache noise
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Local environment files
+.env
+.venv/
+venv/

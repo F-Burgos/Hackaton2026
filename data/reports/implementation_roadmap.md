@@ -15,7 +15,7 @@ Estado: plan tecnico antes de implementar modelos.
 
 ## Fase 0: Higiene y Documentacion
 
-Estado: en progreso.
+Estado: completada como base inicial.
 
 Entregables:
 
@@ -34,6 +34,8 @@ Validacion:
 ## Fase 1: Estructura Minima del Proyecto
 
 Objetivo: preparar una base reproducible sin entrenar modelos aun.
+
+Estado: completada como estructura inicial.
 
 Carpetas candidatas:
 
@@ -67,6 +69,8 @@ Validacion:
 
 Objetivo: poder construir datasets reproducibles y pequenos smoke tests.
 
+Estado: completada para pares imagen-espectro filtrados.
+
 Entregables:
 
 - utilidades para abrir HDF5 lazy.
@@ -91,9 +95,18 @@ Validacion:
 - batch pequeno sin NaN/inf.
 - no cargar todo en memoria.
 
+Comandos validados:
+
+```bash
+bash project/scripts/sh/dry_run_data.sh --sample-size 1
+pytest -q tests/test_data_access.py
+```
+
 ## Fase 3: Baselines de Representacion
 
 Objetivo: obtener embeddings simples antes de entrenar modelos complejos.
+
+Estado: parcialmente iniciado con smoke models, no con baselines cientificos finales.
 
 Candidatos:
 
@@ -108,9 +121,20 @@ Validacion:
 - UMAP/PCA diagnostico.
 - scores kNN/densidad reproducibles.
 
+Smoke tecnico ya validado:
+
+```bash
+bash project/scripts/sh/run_ssl_smoke.sh --modality spectrum --batch-size 4 --steps 2 --subset-size 16
+bash project/scripts/sh/run_ssl_smoke.sh --modality image --batch-size 4 --steps 2 --subset-size 16
+bash project/scripts/sh/run_contrastive_smoke.sh --batch-size 4 --steps 2 --subset-size 16
+pytest -q tests/test_ssl_smoke.py tests/test_contrastive_smoke.py
+```
+
 ## Fase 4: Modelo Contrastivo Base
 
 Objetivo: entrenar representaciones imagen-espectro alineadas.
+
+Estado: no iniciado como entrenamiento completo. Solo existe smoke test de forward/backward.
 
 Primera version:
 

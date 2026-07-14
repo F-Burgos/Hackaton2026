@@ -61,6 +61,61 @@ Este comando muestra:
 - archivos de datos visibles;
 - dependencias Python basicas.
 
+## Dry Run de Datos
+
+Validar HDF5, particiones filtradas y una muestra pequena:
+
+```bash
+bash project/scripts/sh/dry_run_data.sh --sample-size 2
+```
+
+Salida esperada principal:
+
+- `images: 64365`
+- `spectra: 69351`
+- `paired: 64365`
+- `test: 6586`
+- `dry-run OK`
+
+## Smoke Tests Locales
+
+Estos comandos son pruebas tecnicas pequenas en CPU. No son entrenamientos cientificos finales.
+
+SSL espectral:
+
+```bash
+bash project/scripts/sh/run_ssl_smoke.sh \
+  --modality spectrum \
+  --batch-size 4 \
+  --steps 2 \
+  --subset-size 16
+```
+
+SSL imagen:
+
+```bash
+bash project/scripts/sh/run_ssl_smoke.sh \
+  --modality image \
+  --batch-size 4 \
+  --steps 2 \
+  --subset-size 16
+```
+
+Contrastive imagen-espectro:
+
+```bash
+bash project/scripts/sh/run_contrastive_smoke.sh \
+  --batch-size 4 \
+  --steps 2 \
+  --subset-size 16
+```
+
+Pruebas:
+
+```bash
+pytest -q
+```
+
 ## Datos Esperados
 
 Los datos locales deben existir bajo:
@@ -120,7 +175,7 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 
 ## Proximos Comandos Pendientes
 
-Estos scripts se agregaran cuando existan implementaciones reales:
+Estos scripts se agregaran cuando existan implementaciones de entrenamiento/evaluacion completas:
 
 ```text
 project/scripts/sh/run_ssl.sh

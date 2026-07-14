@@ -4,7 +4,7 @@ Ultima actualizacion: 2026-07-14
 
 ## Estado Actual
 
-Estamos en fase de definicion, inspeccion de datos y planificacion tecnica. Todavia no se han implementado modelos, dataloaders ni scripts de entrenamiento.
+Estamos en fase de definicion, inspeccion de datos y preparacion tecnica. Ya existen utilidades de acceso lazy a datos, filtrado de particiones y smoke tests locales para SSL y contrastive. Todavia no hay entrenamiento completo, HPO ni evaluacion final.
 
 ## Decisiones Tomadas
 
@@ -22,6 +22,12 @@ Estamos en fase de definicion, inspeccion de datos y planificacion tecnica. Toda
 - `Codex.md`: instrucciones de workflow del proyecto.
 - `data/reports/dataset_structure_report.md`: estructura y diagnostico inicial del dataset.
 - `data/reports/anomaly_research_plan.md`: plan cientifico del downstream de anomalias.
+- `project/src/data/`: utilidades de rutas, HDF5, particiones y datasets lazy.
+- `project/src/models/`: modelos minimos de smoke para SSL y contrastive.
+- `project/scripts/sh/dry_run_data.sh`: inspeccion reproducible de datos.
+- `project/scripts/sh/run_ssl_smoke.sh`: smoke test SSL local en CPU.
+- `project/scripts/sh/run_contrastive_smoke.sh`: smoke test contrastivo local en CPU.
+- `tests/`: pruebas de acceso a datos y forward/loss.
 
 ## Hallazgos de Datos
 
@@ -50,15 +56,14 @@ Observacion: al revisar el servidor habia un experimento Ray corriendo fuera de 
 
 ## Proximo Bloque
 
-Antes de entrenar:
+Antes de entrenar completo:
 
-1. Definir estructura minima del proyecto.
-2. Crear entorno reproducible.
-3. Implementar utilidades de particiones filtradas.
-4. Implementar datasets/dataloaders seguros para HDF5.
-5. Hacer smoke tests locales.
-6. Definir scripts `.sh`.
-7. Preparar guia de ejecucion local/remota.
+1. Convertir smoke scripts en entrenamiento formal con Hydra.
+2. Definir metricas SSL y contrastive completas.
+3. Definir checkpoints, MLflow y reportes HTML.
+4. Agregar evaluacion contrastive/retrieval separada.
+5. Preparar ejecucion remota via `git pull` en `titae`.
+6. Confirmar que la GPU de `titae` este libre antes de lanzar jobs.
 
 ## No Hacer Todavia
 

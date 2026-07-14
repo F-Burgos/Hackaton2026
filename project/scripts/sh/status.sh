@@ -20,7 +20,12 @@ fi
 
 echo
 echo "== Python =="
-python - <<'PY'
+PYTHON_BIN="${ROOT_DIR}/.venv/bin/python"
+if [[ ! -x "${PYTHON_BIN}" ]]; then
+  PYTHON_BIN="python"
+fi
+echo "python: ${PYTHON_BIN}"
+"${PYTHON_BIN}" - <<'PY'
 import importlib
 
 core = [

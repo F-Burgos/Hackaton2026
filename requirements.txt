@@ -1,0 +1,10 @@
+h5py
+hydra-core
+matplotlib
+numpy<2.2
+omegaconf
+pandas
+pypdf
+scikit-learn
+PyYAML
+tqdm

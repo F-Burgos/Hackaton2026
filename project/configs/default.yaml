@@ -1,0 +1,26 @@
+run:
+  mode: dry_run
+  task: contrastive
+  seed: 42
+
+data:
+  root: hackaton
+  images_h5: images_reduced.h5
+  spectra_h5: spectra.h5
+  partitions_dir: partitions/v1/ssl
+  fold: 0
+  batch_size: 32
+  num_workers: 0
+
+model:
+  image_channels: null
+  spectrum_length: 739
+  embedding_dim: 128
+
+resources:
+  num_gpus: 0
+  gpu_fraction_per_training: 1.0
+
+outputs:
+  root: outputs
+  reports_dir: project/reports

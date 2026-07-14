@@ -32,8 +32,10 @@ core = [
     "pandas",
     "pypdf",
     "sklearn",
-    "torch",
     "yaml",
+]
+training = [
+    "torch",
 ]
 optional = [
     "umap",
@@ -41,6 +43,14 @@ optional = [
 
 print("Core dependencies:")
 for name in core:
+    try:
+        module = importlib.import_module(name)
+        print(f"{name}: OK {getattr(module, '__version__', '')}")
+    except Exception as exc:
+        print(f"{name}: MISSING ({exc})")
+
+print("\nTraining dependencies:")
+for name in training:
     try:
         module = importlib.import_module(name)
         print(f"{name}: OK {getattr(module, '__version__', '')}")

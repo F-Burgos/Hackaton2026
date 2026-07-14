@@ -15,6 +15,7 @@ UV_CACHE_DIR=.uv-cache uv sync
 ```
 
 `--system-site-packages` permite reutilizar instalaciones pesadas ya presentes, especialmente PyTorch/CUDA, sin reinstalarlas desde cero.
+El entorno base no instala PyTorch por defecto; antes de entrenar hay que verificar si existe una build CUDA compatible en la maquina o instalarla explicitamente dentro de `.venv`.
 
 Instalar dependencias de experimentacion cuando vayamos a entrenar o registrar experimentos:
 
@@ -98,7 +99,24 @@ source .venv/bin/activate
 UV_CACHE_DIR=.uv-cache uv sync --group experiment
 ```
 
-Si `uv` no esta instalado en el servidor, instalarlo para el usuario antes de estos comandos.
+En `titae`, `uv` esta disponible en:
+
+```text
+/home/felipeiburgos/.local/bin/uv
+```
+
+Si no aparece en una sesion no interactiva, agregar temporalmente:
+
+```bash
+export PATH=$HOME/.local/bin:$PATH
+```
+
+Antes de entrenar, confirmar PyTorch/CUDA:
+
+```bash
+source .venv/bin/activate
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
 
 ## Proximos Comandos Pendientes
 

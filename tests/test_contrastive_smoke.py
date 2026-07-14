@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-import torch
+import pytest
+
+torch = pytest.importorskip("torch")
 
 from project.src.models.contrastive import ContrastiveModel
 from project.src.models.losses import symmetric_clip_loss

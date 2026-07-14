@@ -12,6 +12,7 @@ __pycache__/
 .venv/
 venv/
 .uv-cache/
+.uv-python/
 .cache/
 .ssh/
 

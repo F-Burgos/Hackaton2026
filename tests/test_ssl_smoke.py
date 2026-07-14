@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-import torch
+import pytest
+
+torch = pytest.importorskip("torch")
 
 from project.src.models.ssl import ImageAutoencoder, SpectrumAutoencoder, masked_mse_loss
 

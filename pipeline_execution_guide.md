@@ -2,20 +2,38 @@
 
 Estado: guia inicial antes de implementar entrenamiento.
 
-## Entorno Local
+## Entorno Comun
 
-Se recomienda usar `uv`.
+El entorno comun del proyecto queda definido por lo que puede correr `titae`.
+La base oficial es:
 
-Crear entorno virtual local:
+- Python `3.10`;
+- `uv`;
+- `.venv` dentro del repositorio;
+- `--system-site-packages` para reutilizar instalaciones pesadas del sistema, especialmente PyTorch/CUDA;
+- dependencias versionadas en `pyproject.toml` y `uv.lock`.
+
+Localmente debemos imitar este entorno para dry runs. No usaremos Python 3.12/3.13 como referencia aunque puedan funcionar para algunas piezas.
+
+Crear o actualizar el entorno:
 
 ```bash
-UV_CACHE_DIR=.uv-cache uv venv --system-site-packages
-source .venv/bin/activate
-UV_CACHE_DIR=.uv-cache uv sync
+bash project/scripts/sh/setup_env.sh
 ```
 
-`--system-site-packages` permite reutilizar instalaciones pesadas ya presentes, especialmente PyTorch/CUDA, sin reinstalarlas desde cero.
-El entorno base no instala PyTorch por defecto; antes de entrenar hay que verificar si existe una build CUDA compatible en la maquina o instalarla explicitamente dentro de `.venv`.
+Si `python3` no apunta a Python 3.10, indicar el binario explicitamente:
+
+```bash
+PYTHON_BIN=/usr/bin/python3 bash project/scripts/sh/setup_env.sh
+```
+
+En `titae`, este comando debe usar `/usr/bin/python3`, que actualmente expone PyTorch/CUDA del sistema.
+
+Activar el entorno:
+
+```bash
+source .venv/bin/activate
+```
 
 Instalar dependencias de experimentacion cuando vayamos a entrenar o registrar experimentos:
 
@@ -29,25 +47,16 @@ Instalar dependencias opcionales de visualizacion, por ejemplo UMAP:
 UV_CACHE_DIR=.uv-cache uv sync --group viz
 ```
 
-Instalar dependencias de desarrollo:
+Verificar PyTorch/CUDA:
 
 ```bash
-UV_CACHE_DIR=.uv-cache uv sync --group dev
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 ```
 
-Alternativa con `pip`:
+En local puede imprimir `cuda False`; en `titae` debe imprimir `cuda True` antes de entrenamientos completos.
+Si localmente Torch no esta disponible para Python 3.10, los tests que dependen de Torch se saltan. Los smoke tests SSL/contrastive completos deben correr en `titae`, donde Torch/CUDA esta disponible.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Si el entorno ya existe:
-
-```bash
-source .venv/bin/activate
-```
+No usar `pip install -r requirements.txt` como flujo principal salvo emergencia. El flujo oficial es `uv` + `pyproject.toml`.
 
 ## Verificar Estado Local
 
@@ -149,9 +158,8 @@ El entorno remoto debe crearse dentro de `~/Hackaton2026`:
 
 ```bash
 cd ~/Hackaton2026
-UV_CACHE_DIR=.uv-cache uv venv --system-site-packages
+bash project/scripts/sh/setup_env.sh
 source .venv/bin/activate
-UV_CACHE_DIR=.uv-cache uv sync --group experiment
 ```
 
 En `titae`, `uv` esta disponible en:

@@ -14,6 +14,7 @@ Estamos en fase de definicion, inspeccion de datos y preparacion tecnica. Ya exi
 - Los dry runs se haran localmente cuando sea posible.
 - Los experimentos completos se correran en `titae`, dentro de `~/Hackaton2026`.
 - En `titae`, el codigo debe actualizarse mediante `git pull`; no se editaran archivos directamente alla.
+- El entorno comun del proyecto sigue lo que `titae` puede ejecutar: Python 3.10, `uv`, `.venv` local al repo y `--system-site-packages` para reutilizar PyTorch/CUDA del sistema.
 - El downstream principal sera investigacion de anomalias en el espacio latente multimodal.
 - Crossmodal feature mapping queda como follow-up, no como primera version.
 
@@ -27,6 +28,7 @@ Estamos en fase de definicion, inspeccion de datos y preparacion tecnica. Ya exi
 - `project/scripts/sh/dry_run_data.sh`: inspeccion reproducible de datos.
 - `project/scripts/sh/run_ssl_smoke.sh`: smoke test SSL local en CPU.
 - `project/scripts/sh/run_contrastive_smoke.sh`: smoke test contrastivo local en CPU.
+- `project/scripts/sh/setup_env.sh`: crea el entorno comun Python 3.10 compatible con `titae`.
 - `tests/`: pruebas de acceso a datos y forward/loss.
 
 ## Hallazgos de Datos

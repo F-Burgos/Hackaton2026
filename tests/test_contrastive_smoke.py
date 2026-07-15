@@ -5,6 +5,7 @@ import pytest
 torch = pytest.importorskip("torch")
 
 from project.src.models.contrastive import ContrastiveModel
+from project.src.models.contrastive import _masked_standardize_sequence
 from project.src.models.losses import symmetric_clip_loss
 
 
@@ -23,3 +24,14 @@ def test_contrastive_forward_and_loss() -> None:
     loss = symmetric_clip_loss(outputs["image_embedding"], outputs["spectrum_embedding"])
     assert torch.isfinite(loss)
     loss.backward()
+
+
+def test_masked_sequence_standardization_ignores_invalid_values() -> None:
+    values = torch.tensor([[1.0, 2.0, 1000.0, 4.0]])
+    mask = torch.tensor([[1.0, 1.0, 0.0, 1.0]])
+
+    normalized = _masked_standardize_sequence(values, mask)
+
+    assert normalized[0, 2] == 0.0
+    assert torch.isclose(normalized[mask.bool()].mean(), torch.tensor(0.0), atol=1e-6)
+    assert torch.isfinite(normalized).all()

@@ -12,6 +12,7 @@ from project.src.data.hdf5_index import Hdf5KeyIndex
 from project.src.data.partitions import load_fold
 from project.src.data.paths import DataPaths
 from project.src.data.torch_datasets import TorchMultimodalPairDataset, multimodal_collate
+from project.src.evaluation.data_quality import batch_quality_metrics, mean_metric_records
 from project.src.evaluation.retrieval import embedding_diagnostics, recall_at_k
 from project.src.models.contrastive import ContrastiveModel
 from project.src.models.losses import symmetric_clip_loss
@@ -147,6 +148,7 @@ def _evaluate(
     losses: list[float] = []
     image_embeddings: list[torch.Tensor] = []
     spectrum_embeddings: list[torch.Tensor] = []
+    quality_records: list[dict[str, float]] = []
     for batch in loader:
         tensor_batch = _to_device(batch, device)
         outputs = model(tensor_batch)
@@ -158,6 +160,7 @@ def _evaluate(
         losses.append(float(loss.item()))
         image_embeddings.append(outputs["image_embedding"].detach().cpu())
         spectrum_embeddings.append(outputs["spectrum_embedding"].detach().cpu())
+        quality_records.append(batch_quality_metrics(tensor_batch))
     image = torch.cat(image_embeddings)
     spectrum = torch.cat(spectrum_embeddings)
     image_to_spectrum = recall_at_k(image, spectrum)
@@ -168,6 +171,7 @@ def _evaluate(
         **{f"s2i_{key}": value for key, value in spectrum_to_image.items()},
         **embedding_diagnostics(image, "image"),
         **embedding_diagnostics(spectrum, "spectrum"),
+        **mean_metric_records(quality_records),
     }
 
 

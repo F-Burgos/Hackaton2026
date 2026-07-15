@@ -4,7 +4,7 @@ Ultima actualizacion: 2026-07-15
 
 ## Estado Actual
 
-Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya existen utilidades de acceso lazy a datos, filtrado de particiones, smoke tests SSL/contrastive, entrenamiento contrastivo base, metricas retrieval y export de embeddings por split. Todavia no hay HPO, entrenamiento largo, reportes cientificos finales ni downstream de anomalias implementado.
+Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya existen utilidades de acceso lazy a datos, filtrado de particiones, smoke tests SSL/contrastive, entrenamiento contrastivo base, metricas retrieval, export de embeddings por split y diagnosticos ligeros del espacio latente. Todavia no hay HPO, entrenamiento largo, reportes cientificos finales ni downstream de anomalias implementado.
 
 ## Decisiones Tomadas
 
@@ -37,10 +37,18 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/scripts/sh/diagnose_embeddings.sh`: diagnosticos PCA/kNN/prefijos sobre embeddings exportados, sin downstream.
 - `tests/`: pruebas de acceso a datos y forward/loss.
 
+## Cambios Recientes
+
+- El modelo contrastivo ahora estandariza imagenes y espectros por muestra usando solo regiones/canales validos por mascara.
+- Entrenamiento y export contrastivo registran fracciones medias de validez:
+  - `image_channel_valid_fraction`;
+  - `spectrum_valid_fraction`.
+- Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en `titae`.
+
 ## Validaciones Recientes
 
 - Local con `.venv` de `uv` Python 3.10:
-  - `pytest -q`: `4 passed, 3 skipped`.
+  - `.venv/bin/python -m pytest -q`: `5 passed, 3 skipped`.
   - Los tests Torch se saltan localmente si Torch no esta instalado para Python 3.10.
 - `titae`:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
@@ -99,11 +107,10 @@ Estado operativo reciente: GPU libre despues de las validaciones, solo Xorg/gnom
 
 Siguiente bloque recomendado:
 
-1. Revisar/ajustar arquitectura o training loop contrastivo antes de escalar mas:
+1. Correr un nuevo smoke/run contrastivo pequeno con normalizacion por muestra:
    - learning rate;
    - temperatura;
    - regularizacion;
-   - normalizacion de inputs;
    - batch size / negativos.
 2. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
 3. Exportar embeddings de validation/test filtrados desde checkpoints realmente competitivos.

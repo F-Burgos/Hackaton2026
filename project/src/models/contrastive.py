@@ -24,7 +24,7 @@ class ImageEncoder(nn.Module):
         )
 
     def forward(self, image: torch.Tensor, image_channel_mask: torch.Tensor) -> torch.Tensor:
-        masked_image = image * image_channel_mask[:, :, None, None]
+        masked_image = _masked_standardize_image(image, image_channel_mask)
         return self.net(masked_image)
 
 
@@ -47,7 +47,7 @@ class SpectrumEncoder(nn.Module):
         )
 
     def forward(self, flux: torch.Tensor, spectrum_mask: torch.Tensor) -> torch.Tensor:
-        masked_flux = flux * spectrum_mask
+        masked_flux = _masked_standardize_sequence(flux, spectrum_mask)
         x = torch.stack([masked_flux, spectrum_mask], dim=1)
         return self.net(x)
 
@@ -81,3 +81,30 @@ def _projection_head(input_dim: int, output_dim: int) -> nn.Sequential:
         nn.GELU(),
         nn.Linear(input_dim, output_dim),
     )
+
+
+def _masked_standardize_image(
+    image: torch.Tensor,
+    channel_mask: torch.Tensor,
+    eps: float = 1e-6,
+) -> torch.Tensor:
+    valid = channel_mask[:, :, None, None].to(dtype=image.dtype)
+    masked = image * valid
+    count = valid.sum(dim=(1, 2, 3), keepdim=True) * image.shape[-1] * image.shape[-2]
+    count = count.clamp_min(1.0)
+    mean = masked.sum(dim=(1, 2, 3), keepdim=True) / count
+    variance = (((masked - mean) * valid) ** 2).sum(dim=(1, 2, 3), keepdim=True) / count
+    return ((image - mean) / torch.sqrt(variance + eps)) * valid
+
+
+def _masked_standardize_sequence(
+    values: torch.Tensor,
+    mask: torch.Tensor,
+    eps: float = 1e-6,
+) -> torch.Tensor:
+    valid = mask.to(dtype=values.dtype)
+    count = valid.sum(dim=1, keepdim=True).clamp_min(1.0)
+    masked = values * valid
+    mean = masked.sum(dim=1, keepdim=True) / count
+    variance = (((values - mean) * valid) ** 2).sum(dim=1, keepdim=True) / count
+    return ((values - mean) / torch.sqrt(variance + eps)) * valid

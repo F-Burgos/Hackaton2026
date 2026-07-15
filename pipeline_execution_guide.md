@@ -226,7 +226,7 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 
 ## Proximos Comandos Pendientes
 
-Estos scripts se agregaran cuando existan implementaciones de entrenamiento/evaluacion completas:
+El pipeline contrastivo base ya existe. Los siguientes scripts quedan pendientes para etapas que aun no estan implementadas:
 
 ```text
 project/scripts/sh/run_ssl.sh
@@ -235,4 +235,9 @@ project/scripts/sh/run_evaluate.sh
 project/scripts/sh/run_pipeline.sh
 ```
 
-Por ahora no hay entrenamiento implementado.
+Antes de escalar entrenamientos, correr primero un run pequeno con el baseline normalizado y revisar:
+
+- loss train/validation;
+- retrieval `image->spectrum` y `spectrum->image`;
+- fracciones de validez `image_channel_valid_fraction` y `spectrum_valid_fraction`;
+- diagnosticos PCA/kNN de embeddings.

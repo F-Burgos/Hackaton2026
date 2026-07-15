@@ -1,0 +1,18 @@
+{
+  "checkpoint_path": "project/results/contrastive/sweep_20260715_175816/lr3e4_temp007_b64/best.pt",
+  "fold": 0,
+  "i2s_recall@1": 0.00390625,
+  "i2s_recall@10": 0.01953125,
+  "i2s_recall@5": 0.0107421875,
+  "image_channel_valid_fraction": 0.5198025275021791,
+  "image_mean_norm": 1.0,
+  "image_mean_std": 0.029167702421545982,
+  "n_objects": 2048,
+  "s2i_recall@1": 0.00146484375,
+  "s2i_recall@10": 0.01611328125,
+  "s2i_recall@5": 0.0087890625,
+  "spectrum_mean_norm": 1.0,
+  "spectrum_mean_std": 0.03669014200568199,
+  "spectrum_valid_fraction": 0.2120865061879158,
+  "split": "val"
+}

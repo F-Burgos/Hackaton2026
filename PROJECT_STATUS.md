@@ -97,6 +97,12 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - export validation desde mejor checkpoint: `i2s_recall@1=0.00244`, `s2i_recall@1=0.00049`;
     - export test desde mejor checkpoint: `i2s_recall@1=0.00098`, `s2i_recall@1=0.00342`;
     - comparado con el run medio anterior, la normalizacion reduce fuertemente la loss de validacion (`4.3111` a `3.1530`), pero retrieval sigue bajo y requiere mejoras de arquitectura/training.
+  - Mini-sweep LR/temperatura con batch `64`:
+    - sweep dir: `project/results/contrastive/sweep_20260715_175816`;
+    - configs: `lr1e-4/temp0.07`, `lr3e-4/temp0.03`, `lr3e-4/temp0.07`, `lr3e-4/temp0.10`;
+    - mejor validation loss dentro del sweep: `lr3e4_temp010_b64`, `best_val_loss=3.8287`;
+    - mejor i2s R@1 dentro del sweep: `lr3e4_temp007_b64`, `i2s_recall@1=0.00391`;
+    - conclusion: batch `64` no mejora contra el run normalizado batch `32`; el siguiente bloque deberia cambiar arquitectura/training, no solo LR/temperatura.
 
 ## Hallazgos de Datos
 
@@ -127,11 +133,11 @@ Estado operativo reciente: GPU libre despues de las validaciones, solo Xorg/gnom
 
 Siguiente bloque recomendado:
 
-1. Correr un nuevo smoke/run contrastivo pequeno con normalizacion por muestra:
-   - learning rate;
-   - temperatura;
-   - regularizacion;
-   - batch size / negativos.
+1. Mejorar el entrenamiento/modelo contrastivo base:
+   - revisar capacidad de encoders;
+   - probar scheduler/early stopping;
+   - considerar hard negatives o memoria de negativos;
+   - revisar normalizacion por canal/modalidad.
 2. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
 3. Exportar embeddings de validation/test filtrados desde checkpoints realmente competitivos.
 4. Recien despues pasar al analisis latente orientado a anomalias.

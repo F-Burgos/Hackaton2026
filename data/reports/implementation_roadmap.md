@@ -134,7 +134,7 @@ pytest -q tests/test_ssl_smoke.py tests/test_contrastive_smoke.py
 
 Objetivo: entrenar representaciones imagen-espectro alineadas.
 
-Estado: no iniciado como entrenamiento completo. Solo existe smoke test de forward/backward.
+Estado: iniciado. Existe un trainer contrastivo base con evaluacion retrieval y checkpoint para runs pequenos/controlados.
 
 Primera version:
 
@@ -157,6 +157,12 @@ Validacion:
 - Recall@K sobre validation;
 - embeddings no colapsados;
 - UMAP/PCA con IDs.
+
+Comando inicial:
+
+```bash
+bash project/scripts/sh/run_contrastive.sh
+```
 
 ## Fase 5: Analisis de Espacio Latente
 

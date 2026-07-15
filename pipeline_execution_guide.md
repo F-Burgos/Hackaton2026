@@ -119,6 +119,23 @@ bash project/scripts/sh/run_contrastive_smoke.sh \
   --subset-size 16
 ```
 
+Entrenamiento contrastivo base, en modo pequeno por defecto:
+
+```bash
+bash project/scripts/sh/run_contrastive.sh
+```
+
+Overrides utiles:
+
+```bash
+bash project/scripts/sh/run_contrastive.sh \
+  train.epochs=2 \
+  train.max_train_samples=1024 \
+  train.max_val_samples=256 \
+  data.batch_size=32 \
+  outputs.contrastive_dir=outputs/contrastive/fold0_debug
+```
+
 Pruebas:
 
 ```bash
@@ -187,7 +204,6 @@ Estos scripts se agregaran cuando existan implementaciones de entrenamiento/eval
 
 ```text
 project/scripts/sh/run_ssl.sh
-project/scripts/sh/run_contrastive.sh
 project/scripts/sh/run_hpo.sh
 project/scripts/sh/run_evaluate.sh
 project/scripts/sh/run_pipeline.sh

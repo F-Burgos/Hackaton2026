@@ -12,15 +12,27 @@ data:
   batch_size: 32
   num_workers: 0
 
+train:
+  epochs: 1
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  temperature: 0.07
+  max_train_samples: 256
+  max_val_samples: 128
+  save_checkpoint: true
+
 model:
   image_channels: null
   spectrum_length: 739
   embedding_dim: 128
+  projection_dim: 128
 
 resources:
   num_gpus: 0
   gpu_fraction_per_training: 1.0
+  device: auto
 
 outputs:
   root: outputs
   reports_dir: project/reports
+  contrastive_dir: outputs/contrastive/dry_run

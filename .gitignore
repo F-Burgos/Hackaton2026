@@ -1,6 +1,7 @@
 # Local dataset artifacts
 hackaton/
 Useful_articles/
+CLAUDE.md
 
 # Python/cache noise
 __pycache__/

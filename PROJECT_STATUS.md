@@ -1,15 +1,16 @@
 # Hackaton2026 Project Status
 
-Ultima actualizacion: 2026-07-14
+Ultima actualizacion: 2026-07-15
 
 ## Estado Actual
 
-Estamos en fase de definicion, inspeccion de datos y preparacion tecnica. Ya existen utilidades de acceso lazy a datos, filtrado de particiones y smoke tests locales para SSL y contrastive. Todavia no hay entrenamiento completo, HPO ni evaluacion final.
+Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya existen utilidades de acceso lazy a datos, filtrado de particiones, smoke tests SSL/contrastive, entrenamiento contrastivo base, metricas retrieval y export de embeddings por split. Todavia no hay HPO, entrenamiento largo, reportes cientificos finales ni downstream de anomalias implementado.
 
 ## Decisiones Tomadas
 
 - El dataset pesado vive en `hackaton/` y no se versiona en Git.
 - Los articulos viven en `Useful_articles/` y tampoco se versionan.
+- `CLAUDE.md` queda como referencia local ignorada por Git; el archivo operativo versionado es `Codex.md`.
 - El desarrollo de codigo se hara localmente.
 - Los dry runs se haran localmente cuando sea posible.
 - Los experimentos completos se correran en `titae`, dentro de `~/Hackaton2026`.
@@ -29,7 +30,27 @@ Estamos en fase de definicion, inspeccion de datos y preparacion tecnica. Ya exi
 - `project/scripts/sh/run_ssl_smoke.sh`: smoke test SSL local en CPU.
 - `project/scripts/sh/run_contrastive_smoke.sh`: smoke test contrastivo local en CPU.
 - `project/scripts/sh/setup_env.sh`: crea el entorno comun Python 3.10 compatible con `titae`.
+- `project/scripts/sh/run_contrastive.sh`: entrenamiento contrastivo base.
+- `project/scripts/sh/export_contrastive_embeddings.sh`: export de embeddings y metricas retrieval desde checkpoint.
 - `tests/`: pruebas de acceso a datos y forward/loss.
+
+## Validaciones Recientes
+
+- Local con `.venv` de `uv` Python 3.10:
+  - `pytest -q`: `4 passed, 3 skipped`.
+  - Los tests Torch se saltan localmente si Torch no esta instalado para Python 3.10.
+- `titae`:
+  - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
+  - `pytest -q`: `8 passed`.
+  - Entrenamiento contrastivo debug:
+    - checkpoint: `outputs/contrastive/titae_debug_20260715_150747/best.pt`;
+    - `train_loss=2.0965`;
+    - `val_loss=2.0855`;
+    - `val_i2s_recall@1=0.03125`;
+    - `val_s2i_recall@1=0.03125`.
+  - Export debug:
+    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/embeddings.npz`;
+    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/metrics.json`.
 
 ## Hallazgos de Datos
 
@@ -54,22 +75,24 @@ Dataset transferido a `titae`:
 - particiones;
 - metadata.
 
-Observacion: al revisar el servidor habia un experimento Ray corriendo fuera de `~/Hackaton2026`, aparentemente en `~/ATAT`, usando GPU. No tocar procesos fuera de `~/Hackaton2026`.
+Estado operativo reciente: GPU libre despues de las validaciones, solo Xorg/gnome usando memoria minima. No tocar procesos fuera de `~/Hackaton2026`.
 
 ## Proximo Bloque
 
-Antes de entrenar completo:
+Siguiente bloque recomendado:
 
-1. Convertir smoke scripts en entrenamiento formal con Hydra.
-2. Definir metricas SSL y contrastive completas.
-3. Definir checkpoints, MLflow y reportes HTML.
-4. Agregar evaluacion contrastive/retrieval separada.
-5. Preparar ejecucion remota via `git pull` en `titae`.
-6. Confirmar que la GPU de `titae` este libre antes de lanzar jobs.
+1. Agregar reportes resumidos de entrenamiento/export en Markdown.
+2. Preparar un run contrastivo mas largo en `titae` con parametros conservadores.
+3. Exportar embeddings de validation/test filtrados desde el mejor checkpoint.
+4. Agregar diagnosticos de embeddings no-downstream:
+   - norms/std;
+   - Recall@K;
+   - PCA/UMAP opcional;
+   - estratificacion por prefijo/survey/cobertura.
+5. Recien despues pasar al analisis latente orientado a anomalias.
 
 ## No Hacer Todavia
 
-- No entrenar experimentos completos.
 - No implementar downstream de anomalias.
 - No modificar HDF5 originales.
 - No lanzar jobs en `titae` si hay GPU/procesos activos sin confirmacion.

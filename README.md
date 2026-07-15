@@ -39,14 +39,14 @@ hackaton/
 
 These files are intentionally ignored by Git.
 
-Lightweight outputs are versioned when they document a run:
+Lightweight outputs under `project/results/` are versioned when they document a run:
 
 - Markdown reports;
 - JSON/JSONL metrics;
 - CSV diagnostics;
 - PNG figures.
 
-Heavy or easily regenerated artifacts remain ignored:
+Heavy or easily regenerated artifacts remain ignored, even when they live below `project/results/`:
 
 - checkpoints (`*.pt`, `*.ckpt`, `*.pth`);
 - exported embedding arrays (`*.npz`);
@@ -111,10 +111,10 @@ Export embeddings from a checkpoint:
 
 ```bash
 bash project/scripts/sh/export_contrastive_embeddings.sh \
-  eval.checkpoint_path=outputs/contrastive/dry_run/best.pt \
+  eval.checkpoint_path=project/results/contrastive/dry_run/best.pt \
   eval.split=val \
   eval.max_samples=128 \
-  eval.output_dir=outputs/contrastive/dry_run_eval
+  eval.output_dir=project/results/contrastive/dry_run_eval
 ```
 
 More execution notes live in [pipeline_execution_guide.md](pipeline_execution_guide.md).

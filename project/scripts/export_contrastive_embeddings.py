@@ -18,7 +18,7 @@ from project.src.evaluation.contrastive_export import (  # noqa: E402
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export embeddings from a contrastive checkpoint.")
-    parser.add_argument("--config", default="project/configs/default.yaml")
+    parser.add_argument("--config", default="project/configs/contrastive/default.yaml")
     parser.add_argument(
         "overrides",
         nargs="*",

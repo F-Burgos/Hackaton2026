@@ -33,12 +33,12 @@ resources:
   device: auto
 
 outputs:
-  root: outputs
+  root: project/results
   reports_dir: project/reports
-  contrastive_dir: outputs/contrastive/dry_run
+  contrastive_dir: project/results/contrastive/dry_run
 
 eval:
-  checkpoint_path: outputs/contrastive/dry_run/best.pt
+  checkpoint_path: project/results/contrastive/dry_run/best.pt
   split: val
   max_samples: 128
-  output_dir: outputs/contrastive/dry_run_eval
+  output_dir: project/results/contrastive/dry_run_eval

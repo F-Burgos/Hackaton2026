@@ -26,7 +26,7 @@ class ContrastiveExportConfig:
     num_workers: int = 0
     max_samples: int | None = None
     device: str = "auto"
-    output_dir: str = "outputs/contrastive/export"
+    output_dir: str = "project/results/contrastive/export"
 
 
 def export_contrastive_embeddings(config: ContrastiveExportConfig) -> dict[str, float | int | str]:

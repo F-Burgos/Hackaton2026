@@ -129,26 +129,26 @@ Exportar embeddings y metricas retrieval desde un checkpoint:
 
 ```bash
 bash project/scripts/sh/export_contrastive_embeddings.sh \
-  eval.checkpoint_path=outputs/contrastive/dry_run/best.pt \
+  eval.checkpoint_path=project/results/contrastive/dry_run/best.pt \
   eval.split=val \
   eval.max_samples=128 \
-  eval.output_dir=outputs/contrastive/dry_run_eval
+  eval.output_dir=project/results/contrastive/dry_run_eval
 ```
 
 Generar reporte Markdown de un run contrastivo:
 
 ```bash
 bash project/scripts/sh/report_contrastive_run.sh \
-  --run-dir outputs/contrastive/dry_run \
-  --export-dir outputs/contrastive/dry_run_eval
+  --run-dir project/results/contrastive/dry_run \
+  --export-dir project/results/contrastive/dry_run_eval
 ```
 
 Diagnosticar embeddings exportados sin downstream de anomalias:
 
 ```bash
 bash project/scripts/sh/diagnose_embeddings.sh \
-  --embeddings-path outputs/contrastive/dry_run_eval/embeddings.npz \
-  --output-dir outputs/contrastive/dry_run_eval/diagnostics
+  --embeddings-path project/results/contrastive/dry_run_eval/embeddings.npz \
+  --output-dir project/results/contrastive/dry_run_eval/diagnostics
 ```
 
 Overrides utiles:
@@ -159,7 +159,7 @@ bash project/scripts/sh/run_contrastive.sh \
   train.max_train_samples=1024 \
   train.max_val_samples=256 \
   data.batch_size=32 \
-  outputs.contrastive_dir=outputs/contrastive/fold0_debug
+  outputs.contrastive_dir=project/results/contrastive/fold0_debug
 ```
 
 Pruebas:

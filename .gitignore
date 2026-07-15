@@ -17,20 +17,20 @@ venv/
 .cache/
 .ssh/
 
-# Local outputs and experiment artifacts
-outputs/*
-!outputs/**/
-!outputs/**/*.csv
-!outputs/**/*.json
-!outputs/**/*.jsonl
-!outputs/**/*.md
-!outputs/**/*.png
-outputs/scripts/
+# Local runtime outputs and experiment artifacts
+outputs/
 mlruns/
-project/results/
-project/reports/
-outputs/**/*.npz
-outputs/**/*.log
+
+# Version lightweight scientific results; ignore heavy/reproducible artifacts.
+project/results/*
+!project/results/**/
+!project/results/**/*.csv
+!project/results/**/*.json
+!project/results/**/*.jsonl
+!project/results/**/*.md
+!project/results/**/*.png
+project/results/**/*.npz
+project/results/**/*.log
 *.ckpt
 *.pt
 *.pth

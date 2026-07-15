@@ -2,10 +2,10 @@
 
 ## Inputs
 
-- run dir: `outputs/contrastive/medium_20260715_161821`
-- export dir: `outputs/contrastive/medium_20260715_161821/export_test2048`
-- checkpoint: `outputs/contrastive/medium_20260715_161821/best.pt`
-- split: `test`
+- run dir: `project/results/contrastive/medium_20260715_161821`
+- export dir: `project/results/contrastive/medium_20260715_161821/export_val2048`
+- checkpoint: `project/results/contrastive/medium_20260715_161821/best.pt`
+- split: `val`
 - objects exported: `2048`
 
 ## Training Summary
@@ -24,23 +24,23 @@
 
 ## Export Retrieval
 
-- i2s_recall@1: `0.001953`
-- i2s_recall@5: `0.009277`
-- i2s_recall@10: `0.017090`
-- s2i_recall@1: `0.001465`
-- s2i_recall@5: `0.009766`
-- s2i_recall@10: `0.021484`
+- i2s_recall@1: `0.001465`
+- i2s_recall@5: `0.006348`
+- i2s_recall@10: `0.017578`
+- s2i_recall@1: `0.001953`
+- s2i_recall@5: `0.010742`
+- s2i_recall@10: `0.016602`
 
 ## Embedding Diagnostics
 
 - image mean norm: `1.000000`
 - spectrum mean norm: `1.000000`
-- image mean std: `0.031917`
-- spectrum mean std: `0.033494`
-- pair cosine mean: `0.507305`
-- pair cosine std: `0.067288`
-- pair distance p50: `0.486715`
-- pair distance p95: `0.609406`
+- image mean std: `0.032101`
+- spectrum mean std: `0.033933`
+- pair cosine mean: `0.506268`
+- pair cosine std: `0.065876`
+- pair distance p50: `0.488246`
+- pair distance p95: `0.603795`
 
 ## Export Prefix Counts
 

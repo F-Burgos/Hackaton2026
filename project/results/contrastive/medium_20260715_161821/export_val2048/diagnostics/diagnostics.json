@@ -1,6 +1,6 @@
 {
   "embedding_dim": 128,
-  "embeddings_path": "outputs/contrastive/medium_20260715_161821/export_val2048/embeddings.npz",
+  "embeddings_path": "project/results/contrastive/medium_20260715_161821/export_val2048/embeddings.npz",
   "knn_kth_distance": {
     "max": 0.02790665626525879,
     "mean": 0.0034349397756159306,

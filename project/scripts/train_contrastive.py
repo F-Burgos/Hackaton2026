@@ -18,7 +18,7 @@ from project.src.training.contrastive_trainer import (  # noqa: E402
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the base image-spectrum contrastive model.")
-    parser.add_argument("--config", default="project/configs/default.yaml")
+    parser.add_argument("--config", default="project/configs/contrastive/default.yaml")
     parser.add_argument(
         "overrides",
         nargs="*",

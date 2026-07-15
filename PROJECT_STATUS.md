@@ -10,7 +10,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 
 - El dataset pesado vive en `hackaton/` y no se versiona en Git.
 - Los articulos viven en `Useful_articles/` y tampoco se versionan.
-- Outputs livianos de evidencia (`.md`, `.json`, `.jsonl`, `.csv`, `.png`) se versionan; checkpoints, embeddings `.npz` y logs crudos se ignoran.
+- Outputs livianos de evidencia bajo `project/results/` (`.md`, `.json`, `.jsonl`, `.csv`, `.png`) se versionan; checkpoints, embeddings `.npz`, logs crudos y `outputs/` runtime se ignoran.
 - `CLAUDE.md` queda como referencia local ignorada por Git; el archivo operativo versionado es `Codex.md`.
 - El desarrollo de codigo se hara localmente.
 - Los dry runs se haran localmente cuando sea posible.
@@ -46,22 +46,22 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
   - `pytest -q`: `8 passed`.
   - Entrenamiento contrastivo debug:
-    - checkpoint: `outputs/contrastive/titae_debug_20260715_150747/best.pt`;
+    - checkpoint: `project/results/contrastive/titae_debug_20260715_150747/best.pt`;
     - `train_loss=2.0965`;
     - `val_loss=2.0855`;
     - `val_i2s_recall@1=0.03125`;
     - `val_s2i_recall@1=0.03125`.
   - Export debug:
-    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/embeddings.npz`;
-    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/metrics.json`.
+    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/embeddings.npz`;
+    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/metrics.json`.
   - Diagnostico de embeddings debug:
-    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/diagnostics.json`;
-    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.csv`;
-    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.png`;
+    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/diagnostics.json`;
+    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.csv`;
+    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.png`;
     - `pair_distance.p50=1.039301`;
     - `knn_mean_distance.p50=0.001465`.
   - Run contrastivo intermedio:
-    - run dir: `outputs/contrastive/medium_20260715_161821`;
+    - run dir: `project/results/contrastive/medium_20260715_161821`;
     - train/val: `8192` / `2048`;
     - epochs: `5`;
     - `train_loss=3.5533`;

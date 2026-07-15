@@ -1,5 +1,5 @@
 {
-  "checkpoint_path": "outputs/contrastive/medium_20260715_161821/best.pt",
+  "checkpoint_path": "project/results/contrastive/medium_20260715_161821/best.pt",
   "fold": 0,
   "i2s_recall@1": 0.001953125,
   "i2s_recall@10": 0.01708984375,

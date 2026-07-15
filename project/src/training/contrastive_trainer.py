@@ -33,7 +33,7 @@ class ContrastiveTrainConfig:
     temperature: float = 0.07
     seed: int = 42
     device: str = "auto"
-    output_dir: str = "outputs/contrastive"
+    output_dir: str = "project/results/contrastive"
     save_checkpoint: bool = True
 
 

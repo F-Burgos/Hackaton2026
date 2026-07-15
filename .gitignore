@@ -25,6 +25,7 @@ outputs/*
 !outputs/**/*.jsonl
 !outputs/**/*.md
 !outputs/**/*.png
+outputs/scripts/
 mlruns/
 project/results/
 project/reports/

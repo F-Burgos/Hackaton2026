@@ -1,0 +1,20 @@
+{
+  "epoch": 1,
+  "n_train": 512,
+  "n_val": 128,
+  "seconds": 0.787,
+  "train_loss": 3.437775880098343,
+  "val_i2s_recall@1": 0.0078125,
+  "val_i2s_recall@10": 0.0859375,
+  "val_i2s_recall@5": 0.0390625,
+  "val_image_channel_valid_fraction": 0.5225694477558136,
+  "val_image_mean_norm": 1.0,
+  "val_image_mean_std": 0.011818992905318737,
+  "val_loss": 3.4745177030563354,
+  "val_s2i_recall@1": 0.0078125,
+  "val_s2i_recall@10": 0.0859375,
+  "val_s2i_recall@5": 0.03125,
+  "val_spectrum_mean_norm": 1.0,
+  "val_spectrum_mean_std": 0.0038262573070824146,
+  "val_spectrum_valid_fraction": 0.2156207598745823
+}

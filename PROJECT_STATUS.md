@@ -52,7 +52,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - Los tests Torch se saltan localmente si Torch no esta instalado para Python 3.10.
 - `titae`:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
-  - `pytest -q`: `8 passed`.
+  - `.venv/bin/python -m pytest -q`: `10 passed`.
   - Entrenamiento contrastivo debug:
     - checkpoint: `project/results/contrastive/titae_debug_20260715_150747/best.pt`;
     - `train_loss=2.0965`;
@@ -77,6 +77,16 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - `val_i2s_recall@1=0.00098`;
     - `test_i2s_recall@1=0.00195` sobre `2048` objetos exportados;
     - observacion: la loss de train baja, pero validation empeora al final; el baseline empieza a sobreajustar o no alinear bien con esta configuracion.
+  - Smoke contrastivo con normalizacion por muestra:
+    - run dir: `project/results/contrastive/normalized_smoke_20260715`;
+    - train/val: `512` / `128`;
+    - epochs: `1`;
+    - `train_loss=3.4378`;
+    - `val_loss=3.4745`;
+    - `val_i2s_recall@1=0.0078125`;
+    - `val_s2i_recall@1=0.0078125`;
+    - `val_image_channel_valid_fraction=0.52257`;
+    - `val_spectrum_valid_fraction=0.21562`.
 
 ## Hallazgos de Datos
 

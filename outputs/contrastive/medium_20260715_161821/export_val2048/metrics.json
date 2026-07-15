@@ -1,0 +1,16 @@
+{
+  "checkpoint_path": "outputs/contrastive/medium_20260715_161821/best.pt",
+  "fold": 0,
+  "i2s_recall@1": 0.00146484375,
+  "i2s_recall@10": 0.017578125,
+  "i2s_recall@5": 0.00634765625,
+  "image_mean_norm": 1.0,
+  "image_mean_std": 0.03210073336958885,
+  "n_objects": 2048,
+  "s2i_recall@1": 0.001953125,
+  "s2i_recall@10": 0.0166015625,
+  "s2i_recall@5": 0.0107421875,
+  "spectrum_mean_norm": 1.0,
+  "spectrum_mean_std": 0.033933188766241074,
+  "split": "val"
+}

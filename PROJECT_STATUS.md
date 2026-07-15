@@ -60,6 +60,15 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - `outputs/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.png`;
     - `pair_distance.p50=1.039301`;
     - `knn_mean_distance.p50=0.001465`.
+  - Run contrastivo intermedio:
+    - run dir: `outputs/contrastive/medium_20260715_161821`;
+    - train/val: `8192` / `2048`;
+    - epochs: `5`;
+    - `train_loss=3.5533`;
+    - `val_loss=4.3111`;
+    - `val_i2s_recall@1=0.00098`;
+    - `test_i2s_recall@1=0.00195` sobre `2048` objetos exportados;
+    - observacion: la loss de train baja, pero validation empeora al final; el baseline empieza a sobreajustar o no alinear bien con esta configuracion.
 
 ## Hallazgos de Datos
 
@@ -90,9 +99,14 @@ Estado operativo reciente: GPU libre despues de las validaciones, solo Xorg/gnom
 
 Siguiente bloque recomendado:
 
-1. Preparar un run contrastivo mas largo en `titae` con parametros conservadores.
-2. Exportar embeddings de validation/test filtrados desde el mejor checkpoint.
-3. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
+1. Revisar/ajustar arquitectura o training loop contrastivo antes de escalar mas:
+   - learning rate;
+   - temperatura;
+   - regularizacion;
+   - normalizacion de inputs;
+   - batch size / negativos.
+2. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
+3. Exportar embeddings de validation/test filtrados desde checkpoints realmente competitivos.
 4. Recien despues pasar al analisis latente orientado a anomalias.
 
 ## No Hacer Todavia

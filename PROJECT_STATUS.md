@@ -87,6 +87,15 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - `val_s2i_recall@1=0.0078125`;
     - `val_image_channel_valid_fraction=0.52257`;
     - `val_spectrum_valid_fraction=0.21562`.
+  - Run contrastivo intermedio con normalizacion por muestra:
+    - run dir: `project/results/contrastive/normalized_medium_20260715_173724`;
+    - train/val: `8192` / `2048`;
+    - epochs: `5`;
+    - mejor checkpoint por validation loss en epoca `4`;
+    - summary final: `train_loss=2.9027`, `val_loss=3.1530`;
+    - export validation desde mejor checkpoint: `i2s_recall@1=0.00244`, `s2i_recall@1=0.00049`;
+    - export test desde mejor checkpoint: `i2s_recall@1=0.00098`, `s2i_recall@1=0.00342`;
+    - comparado con el run medio anterior, la normalizacion reduce fuertemente la loss de validacion (`4.3111` a `3.1530`), pero retrieval sigue bajo y requiere mejoras de arquitectura/training.
 
 ## Hallazgos de Datos
 

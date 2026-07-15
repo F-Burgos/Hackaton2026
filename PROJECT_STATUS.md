@@ -32,6 +32,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/scripts/sh/setup_env.sh`: crea el entorno comun Python 3.10 compatible con `titae`.
 - `project/scripts/sh/run_contrastive.sh`: entrenamiento contrastivo base.
 - `project/scripts/sh/export_contrastive_embeddings.sh`: export de embeddings y metricas retrieval desde checkpoint.
+- `project/scripts/sh/report_contrastive_run.sh`: reporte Markdown de entrenamiento/export contrastivo.
 - `tests/`: pruebas de acceso a datos y forward/loss.
 
 ## Validaciones Recientes
@@ -81,7 +82,7 @@ Estado operativo reciente: GPU libre despues de las validaciones, solo Xorg/gnom
 
 Siguiente bloque recomendado:
 
-1. Agregar reportes resumidos de entrenamiento/export en Markdown.
+1. Validar reportes resumidos de entrenamiento/export en `titae`.
 2. Preparar un run contrastivo mas largo en `titae` con parametros conservadores.
 3. Exportar embeddings de validation/test filtrados desde el mejor checkpoint.
 4. Agregar diagnosticos de embeddings no-downstream:

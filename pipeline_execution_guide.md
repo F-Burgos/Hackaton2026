@@ -135,6 +135,14 @@ bash project/scripts/sh/export_contrastive_embeddings.sh \
   eval.output_dir=outputs/contrastive/dry_run_eval
 ```
 
+Generar reporte Markdown de un run contrastivo:
+
+```bash
+bash project/scripts/sh/report_contrastive_run.sh \
+  --run-dir outputs/contrastive/dry_run \
+  --export-dir outputs/contrastive/dry_run_eval
+```
+
 Overrides utiles:
 
 ```bash

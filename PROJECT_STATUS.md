@@ -53,6 +53,12 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - Export debug:
     - `outputs/contrastive/titae_debug_20260715_150747/export_val32/embeddings.npz`;
     - `outputs/contrastive/titae_debug_20260715_150747/export_val32/metrics.json`.
+  - Diagnostico de embeddings debug:
+    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/diagnostics.json`;
+    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.csv`;
+    - `outputs/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.png`;
+    - `pair_distance.p50=1.039301`;
+    - `knn_mean_distance.p50=0.001465`.
 
 ## Hallazgos de Datos
 
@@ -83,11 +89,10 @@ Estado operativo reciente: GPU libre despues de las validaciones, solo Xorg/gnom
 
 Siguiente bloque recomendado:
 
-1. Validar diagnosticos de embeddings en `titae`.
-2. Preparar un run contrastivo mas largo en `titae` con parametros conservadores.
-3. Exportar embeddings de validation/test filtrados desde el mejor checkpoint.
-4. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
-5. Recien despues pasar al analisis latente orientado a anomalias.
+1. Preparar un run contrastivo mas largo en `titae` con parametros conservadores.
+2. Exportar embeddings de validation/test filtrados desde el mejor checkpoint.
+3. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
+4. Recien despues pasar al analisis latente orientado a anomalias.
 
 ## No Hacer Todavia
 

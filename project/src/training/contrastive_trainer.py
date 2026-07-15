@@ -78,6 +78,7 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
         )
 
         best_val_loss = float("inf")
+        best_metrics: dict[str, float | int | str] = {}
         latest_metrics: dict[str, float | int | str] = {}
         history: list[dict[str, float | int | str]] = []
         for epoch in range(1, config.epochs + 1):
@@ -94,20 +95,23 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
             }
             history.append(latest_metrics)
             _append_jsonl(output_dir / "metrics.jsonl", latest_metrics)
-            if config.save_checkpoint and val_metrics["loss"] < best_val_loss:
+            if val_metrics["loss"] < best_val_loss:
                 best_val_loss = float(val_metrics["loss"])
-                torch.save(
-                    {
-                        "model_state_dict": model.state_dict(),
-                        "config": asdict(config),
-                        "metrics": latest_metrics,
-                    },
-                    output_dir / "best.pt",
-                )
+                best_metrics = latest_metrics.copy()
+                if config.save_checkpoint:
+                    torch.save(
+                        {
+                            "model_state_dict": model.state_dict(),
+                            "config": asdict(config),
+                            "metrics": latest_metrics,
+                        },
+                        output_dir / "best.pt",
+                    )
             print(_format_metrics(latest_metrics), flush=True)
 
-        _write_json(output_dir / "summary.json", latest_metrics)
-        return latest_metrics
+        summary = _with_best_metrics(latest_metrics, best_metrics)
+        _write_json(output_dir / "summary.json", summary)
+        return summary
     finally:
         train_dataset.close()
         val_dataset.close()
@@ -206,6 +210,18 @@ def _write_json(path: Path, record: dict[str, float | int | str]) -> None:
     with path.open("w", encoding="utf-8") as handle:
         json.dump(record, handle, indent=2, sort_keys=True)
         handle.write("\n")
+
+
+def _with_best_metrics(
+    latest_metrics: dict[str, float | int | str],
+    best_metrics: dict[str, float | int | str],
+) -> dict[str, float | int | str]:
+    if not best_metrics:
+        return latest_metrics
+    summary = latest_metrics.copy()
+    for key, value in best_metrics.items():
+        summary[f"best_{key}"] = value
+    return summary
 
 
 def _format_metrics(metrics: dict[str, float | int | str]) -> str:

@@ -143,6 +143,11 @@ bash project/scripts/sh/report_contrastive_run.sh \
   --export-dir project/results/contrastive/dry_run_eval
 ```
 
+Los runs nuevos guardan en `summary.json` las metricas de la ultima epoca y, con prefijo
+`best_`, las metricas de la epoca asociada al mejor checkpoint de validacion.
+Los reportes Markdown muestran ambas secciones para evitar mezclar curvas finales con
+exports hechos desde `best.pt`.
+
 Diagnosticar embeddings exportados sin downstream de anomalias:
 
 ```bash

@@ -43,12 +43,13 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - Entrenamiento y export contrastivo registran fracciones medias de validez:
   - `image_channel_valid_fraction`;
   - `spectrum_valid_fraction`.
+- `summary.json` y los reportes contrastivos nuevos separan metricas de ultima epoca y del mejor checkpoint de validacion usando campos `best_*`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en `titae`.
 
 ## Validaciones Recientes
 
 - Local con `.venv` de `uv` Python 3.10:
-  - `.venv/bin/python -m pytest -q`: `5 passed, 3 skipped`.
+  - `.venv/bin/python -m pytest -q`: `6 passed, 3 skipped`.
   - Los tests Torch se saltan localmente si Torch no esta instalado para Python 3.10.
 - `titae`:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.

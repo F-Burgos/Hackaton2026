@@ -10,6 +10,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 
 - El dataset pesado vive en `hackaton/` y no se versiona en Git.
 - Los articulos viven en `Useful_articles/` y tampoco se versionan.
+- Outputs livianos de evidencia (`.md`, `.json`, `.jsonl`, `.csv`, `.png`) se versionan; checkpoints, embeddings `.npz` y logs crudos se ignoran.
 - `CLAUDE.md` queda como referencia local ignorada por Git; el archivo operativo versionado es `Codex.md`.
 - El desarrollo de codigo se hara localmente.
 - Los dry runs se haran localmente cuando sea posible.

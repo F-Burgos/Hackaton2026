@@ -39,6 +39,19 @@ hackaton/
 
 These files are intentionally ignored by Git.
 
+Lightweight outputs are versioned when they document a run:
+
+- Markdown reports;
+- JSON/JSONL metrics;
+- CSV diagnostics;
+- PNG figures.
+
+Heavy or easily regenerated artifacts remain ignored:
+
+- checkpoints (`*.pt`, `*.ckpt`, `*.pth`);
+- exported embedding arrays (`*.npz`);
+- raw logs.
+
 Key dataset facts:
 
 - paired image-spectrum objects: `64,365`;

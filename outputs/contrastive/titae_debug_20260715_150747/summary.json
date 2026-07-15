@@ -1,0 +1,18 @@
+{
+  "epoch": 1,
+  "n_train": 64,
+  "n_val": 32,
+  "seconds": 0.643,
+  "train_loss": 2.0964754074811935,
+  "val_i2s_recall@1": 0.03125,
+  "val_i2s_recall@10": 0.34375,
+  "val_i2s_recall@5": 0.21875,
+  "val_image_mean_norm": 1.0,
+  "val_image_mean_std": 0.011621212586760521,
+  "val_loss": 2.0855075120925903,
+  "val_s2i_recall@1": 0.03125,
+  "val_s2i_recall@10": 0.34375,
+  "val_s2i_recall@5": 0.15625,
+  "val_spectrum_mean_norm": 1.0,
+  "val_spectrum_mean_std": 0.0018292587483301759
+}

@@ -18,10 +18,18 @@ venv/
 .ssh/
 
 # Local outputs and experiment artifacts
-outputs/
+outputs/*
+!outputs/**/
+!outputs/**/*.csv
+!outputs/**/*.json
+!outputs/**/*.jsonl
+!outputs/**/*.md
+!outputs/**/*.png
 mlruns/
 project/results/
 project/reports/
+outputs/**/*.npz
+outputs/**/*.log
 *.ckpt
 *.pt
 *.pth

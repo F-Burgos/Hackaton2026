@@ -1,0 +1,16 @@
+{
+  "checkpoint_path": "outputs/contrastive/titae_debug_20260715_150747/best.pt",
+  "fold": 0,
+  "i2s_recall@1": 0.03125,
+  "i2s_recall@10": 0.34375,
+  "i2s_recall@5": 0.21875,
+  "image_mean_norm": 1.0,
+  "image_mean_std": 0.011621213518083096,
+  "n_objects": 32,
+  "s2i_recall@1": 0.03125,
+  "s2i_recall@10": 0.34375,
+  "s2i_recall@5": 0.15625,
+  "spectrum_mean_norm": 1.0,
+  "spectrum_mean_std": 0.0018292582826688886,
+  "split": "val"
+}

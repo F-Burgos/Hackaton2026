@@ -34,3 +34,44 @@ def embedding_diagnostics(embeddings: torch.Tensor, prefix: str) -> dict[str, fl
         f"{prefix}_mean_norm": float(embeddings.norm(dim=1).mean().item()),
         f"{prefix}_mean_std": float(embeddings.std(dim=0).mean().item()),
     }
+
+
+@torch.no_grad()
+def pair_similarity_diagnostics(
+    image_embeddings: torch.Tensor,
+    spectrum_embeddings: torch.Tensor,
+) -> dict[str, float]:
+    if image_embeddings.shape != spectrum_embeddings.shape:
+        raise ValueError(
+            "Expected paired embeddings with matching shapes, got "
+            f"{image_embeddings.shape} and {spectrum_embeddings.shape}"
+        )
+    if image_embeddings.ndim != 2:
+        raise ValueError(f"Expected 2D embeddings, got {image_embeddings.ndim}D")
+
+    similarity = image_embeddings @ spectrum_embeddings.T
+    positive = similarity.diag()
+    metrics = {
+        "positive_cosine_mean": float(positive.mean().item()),
+        "positive_cosine_std": float(positive.std(unbiased=False).item()),
+    }
+    if similarity.shape[0] > 1:
+        diagonal = torch.eye(similarity.shape[0], dtype=torch.bool, device=similarity.device)
+        negative = similarity[~diagonal]
+        negative_mean = negative.mean()
+        metrics.update(
+            {
+                "negative_cosine_mean": float(negative_mean.item()),
+                "negative_cosine_std": float(negative.std(unbiased=False).item()),
+                "positive_negative_margin": float((positive.mean() - negative_mean).item()),
+            }
+        )
+    else:
+        metrics.update(
+            {
+                "negative_cosine_mean": float("nan"),
+                "negative_cosine_std": float("nan"),
+                "positive_negative_margin": float("nan"),
+            }
+        )
+    return metrics

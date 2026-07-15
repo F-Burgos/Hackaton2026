@@ -44,6 +44,10 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `image_channel_valid_fraction`;
   - `spectrum_valid_fraction`.
 - `summary.json` y los reportes contrastivos nuevos separan metricas de ultima epoca y del mejor checkpoint de validacion usando campos `best_*`.
+- Entrenamiento, export y reportes contrastivos nuevos incluyen diagnosticos de similitud positiva vs. negativos:
+  - `positive_cosine_mean`;
+  - `negative_cosine_mean`;
+  - `positive_negative_margin`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en `titae`.
 
 ## Validaciones Recientes

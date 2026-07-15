@@ -13,7 +13,11 @@ from project.src.data.partitions import load_fold, load_test
 from project.src.data.paths import DataPaths
 from project.src.data.torch_datasets import TorchMultimodalPairDataset, multimodal_collate
 from project.src.evaluation.data_quality import batch_quality_metrics, mean_metric_records
-from project.src.evaluation.retrieval import embedding_diagnostics, recall_at_k
+from project.src.evaluation.retrieval import (
+    embedding_diagnostics,
+    pair_similarity_diagnostics,
+    recall_at_k,
+)
 from project.src.models.contrastive import ContrastiveModel
 
 
@@ -89,6 +93,7 @@ def export_contrastive_embeddings(config: ContrastiveExportConfig) -> dict[str, 
         **{f"s2i_{key}": value for key, value in recall_at_k(spectrum, image).items()},
         **embedding_diagnostics(image, "image"),
         **embedding_diagnostics(spectrum, "spectrum"),
+        **pair_similarity_diagnostics(image, spectrum),
         **mean_metric_records(quality_records),
     }
 

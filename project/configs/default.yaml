@@ -36,3 +36,9 @@ outputs:
   root: outputs
   reports_dir: project/reports
   contrastive_dir: outputs/contrastive/dry_run
+
+eval:
+  checkpoint_path: outputs/contrastive/dry_run/best.pt
+  split: val
+  max_samples: 128
+  output_dir: outputs/contrastive/dry_run_eval

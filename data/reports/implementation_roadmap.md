@@ -150,6 +150,7 @@ Entregables:
 - entrenamiento completo en `titae`;
 - reporte contrastivo inicial;
 - checkpoint del mejor modelo.
+- export de embeddings por split para analisis posterior.
 
 Validacion:
 
@@ -162,6 +163,12 @@ Comando inicial:
 
 ```bash
 bash project/scripts/sh/run_contrastive.sh
+```
+
+Export inicial:
+
+```bash
+bash project/scripts/sh/export_contrastive_embeddings.sh
 ```
 
 ## Fase 5: Analisis de Espacio Latente

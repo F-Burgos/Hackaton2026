@@ -125,6 +125,16 @@ Entrenamiento contrastivo base, en modo pequeno por defecto:
 bash project/scripts/sh/run_contrastive.sh
 ```
 
+Exportar embeddings y metricas retrieval desde un checkpoint:
+
+```bash
+bash project/scripts/sh/export_contrastive_embeddings.sh \
+  eval.checkpoint_path=outputs/contrastive/dry_run/best.pt \
+  eval.split=val \
+  eval.max_samples=128 \
+  eval.output_dir=outputs/contrastive/dry_run_eval
+```
+
 Overrides utiles:
 
 ```bash

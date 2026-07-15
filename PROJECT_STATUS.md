@@ -33,6 +33,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/scripts/sh/run_contrastive.sh`: entrenamiento contrastivo base.
 - `project/scripts/sh/export_contrastive_embeddings.sh`: export de embeddings y metricas retrieval desde checkpoint.
 - `project/scripts/sh/report_contrastive_run.sh`: reporte Markdown de entrenamiento/export contrastivo.
+- `project/scripts/sh/diagnose_embeddings.sh`: diagnosticos PCA/kNN/prefijos sobre embeddings exportados, sin downstream.
 - `tests/`: pruebas de acceso a datos y forward/loss.
 
 ## Validaciones Recientes
@@ -82,14 +83,10 @@ Estado operativo reciente: GPU libre despues de las validaciones, solo Xorg/gnom
 
 Siguiente bloque recomendado:
 
-1. Validar reportes resumidos de entrenamiento/export en `titae`.
+1. Validar diagnosticos de embeddings en `titae`.
 2. Preparar un run contrastivo mas largo en `titae` con parametros conservadores.
 3. Exportar embeddings de validation/test filtrados desde el mejor checkpoint.
-4. Agregar diagnosticos de embeddings no-downstream:
-   - norms/std;
-   - Recall@K;
-   - PCA/UMAP opcional;
-   - estratificacion por prefijo/survey/cobertura.
+4. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
 5. Recien despues pasar al analisis latente orientado a anomalias.
 
 ## No Hacer Todavia

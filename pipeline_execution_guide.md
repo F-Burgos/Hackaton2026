@@ -143,6 +143,14 @@ bash project/scripts/sh/report_contrastive_run.sh \
   --export-dir outputs/contrastive/dry_run_eval
 ```
 
+Diagnosticar embeddings exportados sin downstream de anomalias:
+
+```bash
+bash project/scripts/sh/diagnose_embeddings.sh \
+  --embeddings-path outputs/contrastive/dry_run_eval/embeddings.npz \
+  --output-dir outputs/contrastive/dry_run_eval/diagnostics
+```
+
 Overrides utiles:
 
 ```bash

@@ -1,6 +1,6 @@
 {
   "embedding_dim": 128,
-  "embeddings_path": "project/results/contrastive/titae_debug_20260715_150747/export_val32/embeddings.npz",
+  "embeddings_path": "project/results/contrastive/remote_debug_20260715_150747/export_val32/embeddings.npz",
   "knn_kth_distance": {
     "max": 0.05800586938858032,
     "mean": 0.005480444058775902,

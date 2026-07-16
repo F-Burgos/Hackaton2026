@@ -68,12 +68,12 @@ Detailed data notes live in [data/reports/dataset_structure_report.md](data/repo
 
 ## Environment
 
-The common environment follows what `titae` can run:
+The common environment follows what the remote GPU/HPC server can run:
 
 - Python `3.10`;
 - `uv`;
 - repo-local `.venv`;
-- `--system-site-packages` so `titae` can reuse system PyTorch/CUDA.
+- `--system-site-packages` so the remote server can reuse system PyTorch/CUDA.
 
 Set up:
 
@@ -82,7 +82,7 @@ bash project/scripts/sh/setup_env.sh
 source .venv/bin/activate
 ```
 
-Local machines without Torch for Python 3.10 can still run non-Torch tests. Full Torch/CUDA validation is expected on `titae`.
+Local machines without Torch for Python 3.10 can still run non-Torch tests. Full Torch/CUDA validation is expected on the remote GPU/HPC server.
 
 ## Common Commands
 
@@ -125,16 +125,12 @@ More execution notes live in [pipeline_execution_guide.md](pipeline_execution_gu
 
 ## Remote Workflow
 
-Full experiments run on:
-
-```text
-felipeiburgos@titae.inf.udec.cl:~/Hackaton2026
-```
+Full experiments run on a private remote GPU/HPC server. The hostname and user are intentionally not versioned.
 
 Rules:
 
 - update remote code with `git pull`;
-- do not edit code directly on `titae`;
+- do not edit code directly on the remote server;
 - do not touch processes outside `~/Hackaton2026`;
 - check GPU/process state before launching jobs.
 

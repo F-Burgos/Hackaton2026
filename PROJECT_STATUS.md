@@ -14,9 +14,9 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `CLAUDE.md` queda como referencia local ignorada por Git; el archivo operativo versionado es `Codex.md`.
 - El desarrollo de codigo se hara localmente.
 - Los dry runs se haran localmente cuando sea posible.
-- Los experimentos completos se correran en `titae`, dentro de `~/Hackaton2026`.
-- En `titae`, el codigo debe actualizarse mediante `git pull`; no se editaran archivos directamente alla.
-- El entorno comun del proyecto sigue lo que `titae` puede ejecutar: Python 3.10, `uv`, `.venv` local al repo y `--system-site-packages` para reutilizar PyTorch/CUDA del sistema.
+- Los experimentos completos se correran en un servidor remoto GPU/HPC privado, dentro de `~/Hackaton2026`.
+- En el servidor remoto, el codigo debe actualizarse mediante `git pull`; no se editaran archivos directamente alla.
+- El entorno comun del proyecto sigue lo que el servidor remoto puede ejecutar: Python 3.10, `uv`, `.venv` local al repo y `--system-site-packages` para reutilizar PyTorch/CUDA del sistema.
 - El downstream principal sera investigacion de anomalias en el espacio latente multimodal.
 - Crossmodal feature mapping queda como follow-up, no como primera version.
 - El objetivo amplio post-hackaton incluye estudiar como integrar agentes y modelos de lenguaje en la investigacion cientifica, manteniendo trazabilidad, reproducibilidad y juicio cientifico humano.
@@ -32,7 +32,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/scripts/sh/dry_run_data.sh`: inspeccion reproducible de datos.
 - `project/scripts/sh/run_ssl_smoke.sh`: smoke test SSL local en CPU.
 - `project/scripts/sh/run_contrastive_smoke.sh`: smoke test contrastivo local en CPU.
-- `project/scripts/sh/setup_env.sh`: crea el entorno comun Python 3.10 compatible con `titae`.
+- `project/scripts/sh/setup_env.sh`: crea el entorno comun Python 3.10 compatible con el servidor remoto.
 - `project/scripts/sh/run_contrastive.sh`: entrenamiento contrastivo base.
 - `project/scripts/sh/export_contrastive_embeddings.sh`: export de embeddings y metricas retrieval desde checkpoint.
 - `project/scripts/sh/report_contrastive_run.sh`: reporte Markdown de entrenamiento/export contrastivo.
@@ -61,14 +61,14 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `model.encoder_width`;
   - `model.dropout`.
 - El downstream de anomalias queda condicionado a tener primero un modelo contrastivo confiable, con validation estable, margen positivo-negativo sano, retrieval por encima del azar y reportes reproducibles desde `best.pt`.
-- Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en `titae`.
+- Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en el servidor remoto.
 
 ## Validaciones Recientes
 
 - Local con `.venv` de `uv` Python 3.10:
   - `.venv/bin/python -m pytest -q`: `6 passed, 3 skipped`.
   - Los tests Torch se saltan localmente si Torch no esta instalado para Python 3.10.
-- `titae`:
+- Servidor remoto:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
   - `.venv/bin/python -m pytest -q`: `12 passed`.
   - Smoke contrastivo con scheduler/clipping/early stopping:
@@ -80,18 +80,18 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - `best_val_loss=3.4658`;
     - `best_val_positive_negative_margin=0.000016`;
   - Entrenamiento contrastivo debug:
-    - checkpoint: `project/results/contrastive/titae_debug_20260715_150747/best.pt`;
+    - checkpoint: `project/results/contrastive/remote_debug_20260715_150747/best.pt`;
     - `train_loss=2.0965`;
     - `val_loss=2.0855`;
     - `val_i2s_recall@1=0.03125`;
     - `val_s2i_recall@1=0.03125`.
   - Export debug:
-    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/embeddings.npz`;
-    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/metrics.json`.
+    - `project/results/contrastive/remote_debug_20260715_150747/export_val32/embeddings.npz`;
+    - `project/results/contrastive/remote_debug_20260715_150747/export_val32/metrics.json`.
   - Diagnostico de embeddings debug:
-    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/diagnostics.json`;
-    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.csv`;
-    - `project/results/contrastive/titae_debug_20260715_150747/export_val32/diagnostics/pca_projection.png`;
+    - `project/results/contrastive/remote_debug_20260715_150747/export_val32/diagnostics/diagnostics.json`;
+    - `project/results/contrastive/remote_debug_20260715_150747/export_val32/diagnostics/pca_projection.csv`;
+    - `project/results/contrastive/remote_debug_20260715_150747/export_val32/diagnostics/pca_projection.png`;
     - `pair_distance.p50=1.039301`;
     - `knn_mean_distance.p50=0.001465`.
   - Run contrastivo intermedio:
@@ -142,10 +142,10 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 
 ## Estado Remoto
 
-Servidor: `felipeiburgos@titae.inf.udec.cl`  
+Servidor: privado, no versionado por seguridad.  
 Directorio permitido: `~/Hackaton2026`
 
-Dataset transferido a `titae`:
+Dataset transferido al servidor remoto:
 
 - `images_reduced.h5`;
 - `spectra.h5`;
@@ -171,5 +171,5 @@ Siguiente bloque recomendado:
 
 - No implementar downstream de anomalias.
 - No modificar HDF5 originales.
-- No lanzar jobs en `titae` si hay GPU/procesos activos sin confirmacion.
-- No editar codigo directamente en `titae`.
+- No lanzar jobs en el servidor remoto si hay GPU/procesos activos sin confirmacion.
+- No editar codigo directamente en el servidor remoto.

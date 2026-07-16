@@ -11,7 +11,7 @@ Estado: plan tecnico antes de implementar modelos.
 - Filtrar particiones contra keys reales de los HDF5.
 - Mantener test intacto para evaluacion final.
 - Versionar codigo, configuraciones y reportes; no versionar datos pesados, papers ni artefactos.
-- Trabajar localmente y actualizar `titae` mediante Git.
+- Trabajar localmente y actualizar el servidor remoto mediante Git.
 
 ## Fase 0: Higiene y Documentacion
 
@@ -147,7 +147,7 @@ Primera version:
 Entregables:
 
 - entrenamiento local dry-run;
-- entrenamiento completo en `titae`;
+- entrenamiento completo en el servidor remoto;
 - reporte contrastivo inicial;
 - checkpoint del mejor modelo.
 - export de embeddings por split para analisis posterior.
@@ -241,5 +241,5 @@ Version posterior:
   - git status;
   - ultimo commit;
   - jobs locales/remotos;
-  - uso GPU en `titae`;
+  - uso GPU en el servidor remoto;
   - ultimos logs de entrenamiento.

@@ -4,7 +4,7 @@ Estado: guia inicial antes de implementar entrenamiento.
 
 ## Entorno Comun
 
-El entorno comun del proyecto queda definido por lo que puede correr `titae`.
+El entorno comun del proyecto queda definido por lo que puede correr el servidor remoto GPU/HPC.
 La base oficial es:
 
 - Python `3.10`;
@@ -27,7 +27,7 @@ Si `python3` no apunta a Python 3.10, indicar el binario explicitamente:
 PYTHON_BIN=/usr/bin/python3 bash project/scripts/sh/setup_env.sh
 ```
 
-En `titae`, este comando debe usar `/usr/bin/python3`, que actualmente expone PyTorch/CUDA del sistema.
+En el servidor remoto, este comando debe usar el Python del sistema que expone PyTorch/CUDA.
 
 Activar el entorno:
 
@@ -53,8 +53,8 @@ Verificar PyTorch/CUDA:
 python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 ```
 
-En local puede imprimir `cuda False`; en `titae` debe imprimir `cuda True` antes de entrenamientos completos.
-Si localmente Torch no esta disponible para Python 3.10, los tests que dependen de Torch se saltan. Los smoke tests SSL/contrastive completos deben correr en `titae`, donde Torch/CUDA esta disponible.
+En local puede imprimir `cuda False`; en el servidor remoto debe imprimir `cuda True` antes de entrenamientos completos.
+Si localmente Torch no esta disponible para Python 3.10, los tests que dependen de Torch se saltan. Los smoke tests SSL/contrastive completos deben correr en el servidor remoto, donde Torch/CUDA esta disponible.
 
 No usar `pip install -r requirements.txt` como flujo principal salvo emergencia. El flujo oficial es `uv` + `pyproject.toml`.
 
@@ -212,7 +212,7 @@ hackaton/
 
 Los datos no se versionan en Git.
 
-## Servidor `titae`
+## Servidor Remoto
 
 Reglas:
 
@@ -235,16 +235,12 @@ bash project/scripts/sh/setup_env.sh
 source .venv/bin/activate
 ```
 
-En `titae`, `uv` esta disponible en:
+La ruta de `uv` en el servidor remoto no se versiona por seguridad. Si no aparece en una sesion no interactiva, agregar al `PATH` la ruta privada correspondiente del usuario.
 
-```text
-/home/felipeiburgos/.local/bin/uv
-```
-
-Si no aparece en una sesion no interactiva, agregar temporalmente:
+Ejemplo:
 
 ```bash
-export PATH=$HOME/.local/bin:$PATH
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
 Antes de entrenar, confirmar PyTorch/CUDA:

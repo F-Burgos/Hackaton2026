@@ -30,7 +30,7 @@ import sys
 
 version = f"{sys.version_info.major}.{sys.version_info.minor}"
 if version != "3.10":
-    raise SystemExit(f"Expected Python 3.10 to match titae, got {version}")
+    raise SystemExit(f"Expected Python 3.10 to match the remote GPU/HPC server, got {version}")
 
 print("python", sys.executable)
 try:

@@ -2,9 +2,9 @@
 
 ## Inputs
 
-- run dir: `project/results/contrastive/titae_debug_20260715_150747`
-- export dir: `project/results/contrastive/titae_debug_20260715_150747/export_val32`
-- checkpoint: `project/results/contrastive/titae_debug_20260715_150747/best.pt`
+- run dir: `project/results/contrastive/remote_debug_20260715_150747`
+- export dir: `project/results/contrastive/remote_debug_20260715_150747/export_val32`
+- checkpoint: `project/results/contrastive/remote_debug_20260715_150747/best.pt`
 - split: `val`
 - objects exported: `32`
 

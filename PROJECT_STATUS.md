@@ -65,7 +65,15 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - Los tests Torch se saltan localmente si Torch no esta instalado para Python 3.10.
 - `titae`:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
-  - `.venv/bin/python -m pytest -q`: `10 passed`.
+  - `.venv/bin/python -m pytest -q`: `12 passed`.
+  - Smoke contrastivo con scheduler/clipping/early stopping:
+    - run dir: `project/results/contrastive/scheduled_smoke_20260715`;
+    - train/val: `256` / `128`;
+    - epochs configuradas: `3`;
+    - early stopping activo en epoca `3`;
+    - `best_epoch=1`;
+    - `best_val_loss=3.4658`;
+    - `best_val_positive_negative_margin=0.000016`;
   - Entrenamiento contrastivo debug:
     - checkpoint: `project/results/contrastive/titae_debug_20260715_150747/best.pt`;
     - `train_loss=2.0965`;

@@ -1,6 +1,6 @@
 # Hackaton2026 Project Status
 
-Ultima actualizacion: 2026-07-15
+Ultima actualizacion: 2026-07-16
 
 ## Estado Actual
 
@@ -19,6 +19,8 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - El entorno comun del proyecto sigue lo que `titae` puede ejecutar: Python 3.10, `uv`, `.venv` local al repo y `--system-site-packages` para reutilizar PyTorch/CUDA del sistema.
 - El downstream principal sera investigacion de anomalias en el espacio latente multimodal.
 - Crossmodal feature mapping queda como follow-up, no como primera version.
+- El objetivo amplio post-hackaton incluye estudiar como integrar agentes y modelos de lenguaje en la investigacion cientifica, manteniendo trazabilidad, reproducibilidad y juicio cientifico humano.
+- Codex debe entregar reportes de progreso frecuentes durante trabajo local, ejecuciones remotas, experimentos y cambios de direccion.
 
 ## Artefactos Creados
 

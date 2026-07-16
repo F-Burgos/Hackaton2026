@@ -93,6 +93,7 @@ Antes de programar, Codex debe:
 Durante la implementación:
 
 - hacer cambios pequeños y revisables;
+- entregar reportes de progreso frecuentes, especialmente antes y después de cambios de código, ejecuciones remotas, experimentos largos o decisiones científicas;
 - evitar refactors no solicitados;
 - no duplicar lógica;
 - separar datos, modelos, entrenamiento y evaluación;

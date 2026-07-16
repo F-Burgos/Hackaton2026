@@ -4,6 +4,10 @@ Multimodal representation learning for paired galaxy image stamps and spectra.
 
 The current objective is to build a reliable image-spectrum contrastive pipeline and inspect the learned multimodal latent space. The anomaly-detection downstream is defined in the project reports, but is not implemented yet.
 
+## Broader Goal
+
+Beyond the immediate hackaton objective, this repository is also a working case study in how agents and language models can be integrated into scientific research. The project is meant to keep code, experiments, data reports, decisions, and progress traces in one reproducible workflow where human scientific judgment stays central and AI agents help with implementation, validation, documentation, and experiment management.
+
 ## Current Status
 
 Implemented:

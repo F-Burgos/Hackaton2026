@@ -41,6 +41,9 @@ def export_contrastive_embeddings(config: ContrastiveExportConfig) -> dict[str, 
     model = ContrastiveModel(
         embedding_dim=int(model_config.get("embedding_dim", 128)),
         projection_dim=int(model_config.get("projection_dim", 128)),
+        encoder_width=float(model_config.get("encoder_width", 1.0)),
+        encoder_variant=str(model_config.get("encoder_variant", "simple")),
+        dropout=float(model_config.get("dropout", 0.0)),
     ).to(device)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()

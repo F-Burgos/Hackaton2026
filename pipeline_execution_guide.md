@@ -180,6 +180,18 @@ bash project/scripts/sh/run_contrastive.sh \
   outputs.contrastive_dir=project/results/contrastive/scheduled_debug
 ```
 
+Variante opcional de encoders con bloques residuales:
+
+```bash
+bash project/scripts/sh/run_contrastive.sh \
+  model.encoder_variant=residual \
+  model.encoder_width=1.0 \
+  model.dropout=0.1 \
+  train.learning_rate=0.0003 \
+  train.gradient_clip_norm=1.0 \
+  outputs.contrastive_dir=project/results/contrastive/residual_debug
+```
+
 Pruebas:
 
 ```bash

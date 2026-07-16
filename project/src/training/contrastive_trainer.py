@@ -40,6 +40,9 @@ class ContrastiveTrainConfig:
     early_stopping_min_delta: float = 0.0
     embedding_dim: int = 128
     projection_dim: int = 128
+    encoder_width: float = 1.0
+    encoder_variant: str = "simple"
+    dropout: float = 0.0
     temperature: float = 0.07
     seed: int = 42
     device: str = "auto"
@@ -79,6 +82,9 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
         model = ContrastiveModel(
             embedding_dim=config.embedding_dim,
             projection_dim=config.projection_dim,
+            encoder_width=config.encoder_width,
+            encoder_variant=config.encoder_variant,
+            dropout=config.dropout,
         ).to(device)
         optimizer = torch.optim.AdamW(
             model.parameters(),

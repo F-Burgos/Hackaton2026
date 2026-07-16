@@ -56,6 +56,11 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `train.min_learning_rate`;
   - `train.early_stopping_patience`;
   - `train.early_stopping_min_delta`.
+- El modelo contrastivo ahora permite comparar encoders `simple` y `residual` mediante:
+  - `model.encoder_variant`;
+  - `model.encoder_width`;
+  - `model.dropout`.
+- El downstream de anomalias queda condicionado a tener primero un modelo contrastivo confiable, con validation estable, margen positivo-negativo sano, retrieval por encima del azar y reportes reproducibles desde `best.pt`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en `titae`.
 
 ## Validaciones Recientes

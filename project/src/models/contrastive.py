@@ -6,21 +6,47 @@ from torch.nn import functional as F
 
 
 class ImageEncoder(nn.Module):
-    def __init__(self, in_channels: int = 9, embedding_dim: int = 128) -> None:
+    def __init__(
+        self,
+        in_channels: int = 9,
+        embedding_dim: int = 128,
+        encoder_width: float = 1.0,
+        encoder_variant: str = "simple",
+        dropout: float = 0.0,
+    ) -> None:
         super().__init__()
+        c1, c2, c3 = _scaled_channels((32, 64, 128), encoder_width)
+        if encoder_variant == "simple":
+            layers: list[nn.Module] = [
+                nn.Conv2d(in_channels, c1, kernel_size=5, stride=2, padding=2),
+                nn.BatchNorm2d(c1),
+                nn.GELU(),
+                nn.Conv2d(c1, c2, kernel_size=3, stride=2, padding=1),
+                nn.BatchNorm2d(c2),
+                nn.GELU(),
+                nn.Conv2d(c2, c3, kernel_size=3, stride=2, padding=1),
+                nn.BatchNorm2d(c3),
+                nn.GELU(),
+            ]
+        elif encoder_variant == "residual":
+            layers = [
+                _image_downsample_block(in_channels, c1, kernel_size=5),
+                _ResidualImageBlock(c1, dropout=dropout),
+                _image_downsample_block(c1, c2),
+                _ResidualImageBlock(c2, dropout=dropout),
+                _image_downsample_block(c2, c3),
+                _ResidualImageBlock(c3, dropout=dropout),
+            ]
+        else:
+            raise ValueError(
+                f"Unknown encoder_variant {encoder_variant!r}; expected 'simple' or 'residual'"
+            )
         self.net = nn.Sequential(
-            nn.Conv2d(in_channels, 32, kernel_size=5, stride=2, padding=2),
-            nn.BatchNorm2d(32),
-            nn.GELU(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),
-            nn.BatchNorm2d(64),
-            nn.GELU(),
-            nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),
-            nn.BatchNorm2d(128),
-            nn.GELU(),
+            *layers,
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
-            nn.Linear(128, embedding_dim),
+            nn.Dropout(dropout),
+            nn.Linear(c3, embedding_dim),
         )
 
     def forward(self, image: torch.Tensor, image_channel_mask: torch.Tensor) -> torch.Tensor:
@@ -29,21 +55,46 @@ class ImageEncoder(nn.Module):
 
 
 class SpectrumEncoder(nn.Module):
-    def __init__(self, embedding_dim: int = 128) -> None:
+    def __init__(
+        self,
+        embedding_dim: int = 128,
+        encoder_width: float = 1.0,
+        encoder_variant: str = "simple",
+        dropout: float = 0.0,
+    ) -> None:
         super().__init__()
+        c1, c2, c3 = _scaled_channels((32, 64, 128), encoder_width)
+        if encoder_variant == "simple":
+            layers: list[nn.Module] = [
+                nn.Conv1d(2, c1, kernel_size=9, padding=4),
+                nn.BatchNorm1d(c1),
+                nn.GELU(),
+                nn.Conv1d(c1, c2, kernel_size=9, stride=2, padding=4),
+                nn.BatchNorm1d(c2),
+                nn.GELU(),
+                nn.Conv1d(c2, c3, kernel_size=7, stride=2, padding=3),
+                nn.BatchNorm1d(c3),
+                nn.GELU(),
+            ]
+        elif encoder_variant == "residual":
+            layers = [
+                _spectrum_block(2, c1, kernel_size=9, stride=1),
+                _ResidualSpectrumBlock(c1, dropout=dropout),
+                _spectrum_block(c1, c2, kernel_size=9, stride=2),
+                _ResidualSpectrumBlock(c2, dropout=dropout),
+                _spectrum_block(c2, c3, kernel_size=7, stride=2),
+                _ResidualSpectrumBlock(c3, dropout=dropout),
+            ]
+        else:
+            raise ValueError(
+                f"Unknown encoder_variant {encoder_variant!r}; expected 'simple' or 'residual'"
+            )
         self.net = nn.Sequential(
-            nn.Conv1d(2, 32, kernel_size=9, padding=4),
-            nn.BatchNorm1d(32),
-            nn.GELU(),
-            nn.Conv1d(32, 64, kernel_size=9, stride=2, padding=4),
-            nn.BatchNorm1d(64),
-            nn.GELU(),
-            nn.Conv1d(64, 128, kernel_size=7, stride=2, padding=3),
-            nn.BatchNorm1d(128),
-            nn.GELU(),
+            *layers,
             nn.AdaptiveAvgPool1d(1),
             nn.Flatten(),
-            nn.Linear(128, embedding_dim),
+            nn.Dropout(dropout),
+            nn.Linear(c3, embedding_dim),
         )
 
     def forward(self, flux: torch.Tensor, spectrum_mask: torch.Tensor) -> torch.Tensor:
@@ -53,12 +104,29 @@ class SpectrumEncoder(nn.Module):
 
 
 class ContrastiveModel(nn.Module):
-    def __init__(self, embedding_dim: int = 128, projection_dim: int = 128) -> None:
+    def __init__(
+        self,
+        embedding_dim: int = 128,
+        projection_dim: int = 128,
+        encoder_width: float = 1.0,
+        encoder_variant: str = "simple",
+        dropout: float = 0.0,
+    ) -> None:
         super().__init__()
-        self.image_encoder = ImageEncoder(embedding_dim=embedding_dim)
-        self.spectrum_encoder = SpectrumEncoder(embedding_dim=embedding_dim)
-        self.image_projection = _projection_head(embedding_dim, projection_dim)
-        self.spectrum_projection = _projection_head(embedding_dim, projection_dim)
+        self.image_encoder = ImageEncoder(
+            embedding_dim=embedding_dim,
+            encoder_width=encoder_width,
+            encoder_variant=encoder_variant,
+            dropout=dropout,
+        )
+        self.spectrum_encoder = SpectrumEncoder(
+            embedding_dim=embedding_dim,
+            encoder_width=encoder_width,
+            encoder_variant=encoder_variant,
+            dropout=dropout,
+        )
+        self.image_projection = _projection_head(embedding_dim, projection_dim, dropout=dropout)
+        self.spectrum_projection = _projection_head(embedding_dim, projection_dim, dropout=dropout)
 
     def forward(self, batch: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
         image_features = self.image_encoder(batch["img"], batch["img_channel_mask"])
@@ -75,12 +143,80 @@ class ContrastiveModel(nn.Module):
         }
 
 
-def _projection_head(input_dim: int, output_dim: int) -> nn.Sequential:
+class _ResidualImageBlock(nn.Module):
+    def __init__(self, channels: int, dropout: float = 0.0) -> None:
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Conv2d(channels, channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(channels),
+            nn.GELU(),
+            nn.Dropout2d(dropout),
+            nn.Conv2d(channels, channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(channels),
+        )
+        self.activation = nn.GELU()
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        return self.activation(values + self.net(values))
+
+
+class _ResidualSpectrumBlock(nn.Module):
+    def __init__(self, channels: int, dropout: float = 0.0) -> None:
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Conv1d(channels, channels, kernel_size=5, padding=2),
+            nn.BatchNorm1d(channels),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Conv1d(channels, channels, kernel_size=5, padding=2),
+            nn.BatchNorm1d(channels),
+        )
+        self.activation = nn.GELU()
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        return self.activation(values + self.net(values))
+
+
+def _image_downsample_block(
+    in_channels: int,
+    out_channels: int,
+    kernel_size: int = 3,
+) -> nn.Sequential:
+    padding = kernel_size // 2
+    return nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=2, padding=padding),
+        nn.BatchNorm2d(out_channels),
+        nn.GELU(),
+    )
+
+
+def _spectrum_block(
+    in_channels: int,
+    out_channels: int,
+    kernel_size: int,
+    stride: int,
+) -> nn.Sequential:
+    padding = kernel_size // 2
+    return nn.Sequential(
+        nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding),
+        nn.BatchNorm1d(out_channels),
+        nn.GELU(),
+    )
+
+
+def _projection_head(input_dim: int, output_dim: int, dropout: float = 0.0) -> nn.Sequential:
     return nn.Sequential(
         nn.Linear(input_dim, input_dim),
         nn.GELU(),
+        nn.Dropout(dropout),
         nn.Linear(input_dim, output_dim),
     )
+
+
+def _scaled_channels(channels: tuple[int, ...], width: float) -> tuple[int, ...]:
+    if width <= 0:
+        raise ValueError(f"encoder_width must be positive, got {width}")
+    return tuple(max(1, int(round(channel * width))) for channel in channels)
 
 
 def _masked_standardize_image(

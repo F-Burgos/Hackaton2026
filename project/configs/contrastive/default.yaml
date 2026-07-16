@@ -31,6 +31,9 @@ model:
   spectrum_length: 739
   embedding_dim: 128
   projection_dim: 128
+  encoder_width: 1.0
+  encoder_variant: simple
+  dropout: 0.0
 
 resources:
   num_gpus: 0

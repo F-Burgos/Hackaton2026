@@ -29,6 +29,19 @@ Este downstream se implementara despues de tener resueltos:
 - metricas de alineacion y retrieval;
 - reportes del modelo contrastivo.
 
+Gate de avance:
+
+No se debe implementar el downstream hasta contar con un modelo contrastivo suficientemente confiable para producir embeddings interpretables. Como minimo, antes de pasar a anomalías se debe tener:
+
+- una loss de validation estable o con early stopping claro;
+- margen positivo-negativo mayor que cero y no compatible con colapso numerico;
+- retrieval cross-modal consistentemente por encima del azar en validation;
+- diagnosticos de embedding sin colapso evidente;
+- reportes reproducibles de validation y test desde `best.pt`;
+- conclusion explicita de que el espacio latente es util como base de anomaly scoring.
+
+Si estas condiciones no se cumplen, el trabajo debe seguir enfocado en arquitectura, entrenamiento, normalizacion o diagnosticos del modelo contrastivo.
+
 La ventaja de este enfoque es que reutiliza directamente el trabajo de las etapas anteriores. SSL, contrastive, retrieval y diagnosticos de espacio latente no son pasos descartables, sino la base del downstream: el detector de anomalias se apoya en embeddings, vecindarios, densidades y rankings ya producidos por el pipeline multimodal.
 
 ## Datos Relevantes

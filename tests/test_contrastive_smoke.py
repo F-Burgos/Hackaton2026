@@ -26,6 +26,28 @@ def test_contrastive_forward_and_loss() -> None:
     loss.backward()
 
 
+def test_residual_contrastive_forward_and_loss() -> None:
+    batch = {
+        "img": torch.randn(2, 9, 64, 64),
+        "img_channel_mask": torch.ones(2, 9),
+        "flux_lambda_normalized": torch.randn(2, 739),
+        "mask_spectra": torch.ones(2, 739),
+    }
+    model = ContrastiveModel(
+        embedding_dim=24,
+        projection_dim=12,
+        encoder_width=0.5,
+        encoder_variant="residual",
+        dropout=0.1,
+    )
+    outputs = model(batch)
+
+    assert outputs["image_embedding"].shape == (2, 12)
+    assert outputs["spectrum_embedding"].shape == (2, 12)
+    loss = symmetric_clip_loss(outputs["image_embedding"], outputs["spectrum_embedding"])
+    assert torch.isfinite(loss)
+
+
 def test_masked_sequence_standardization_ignores_invalid_values() -> None:
     values = torch.tensor([[1.0, 2.0, 1000.0, 4.0]])
     mask = torch.tensor([[1.0, 1.0, 0.0, 1.0]])
@@ -35,3 +57,8 @@ def test_masked_sequence_standardization_ignores_invalid_values() -> None:
     assert normalized[0, 2] == 0.0
     assert torch.isclose(normalized[mask.bool()].mean(), torch.tensor(0.0), atol=1e-6)
     assert torch.isfinite(normalized).all()
+
+
+def test_encoder_width_must_be_positive() -> None:
+    with pytest.raises(ValueError, match="encoder_width"):
+        ContrastiveModel(encoder_width=0.0)

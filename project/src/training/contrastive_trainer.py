@@ -33,6 +33,11 @@ class ContrastiveTrainConfig:
     epochs: int = 1
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
+    gradient_clip_norm: float | None = None
+    lr_scheduler: str = "none"
+    min_learning_rate: float = 0.0
+    early_stopping_patience: int | None = None
+    early_stopping_min_delta: float = 0.0
     embedding_dim: int = 128
     projection_dim: int = 128
     temperature: float = 0.07
@@ -80,27 +85,32 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
             lr=config.learning_rate,
             weight_decay=config.weight_decay,
         )
+        scheduler = _build_scheduler(optimizer, config)
 
         best_val_loss = float("inf")
         best_metrics: dict[str, float | int | str] = {}
         latest_metrics: dict[str, float | int | str] = {}
         history: list[dict[str, float | int | str]] = []
+        epochs_without_improvement = 0
         for epoch in range(1, config.epochs + 1):
             started = time()
             train_metrics = _train_epoch(model, train_loader, optimizer, config, device)
             val_metrics = _evaluate(model, val_loader, config, device)
+            learning_rate = float(optimizer.param_groups[0]["lr"])
             latest_metrics = {
                 "epoch": epoch,
                 "seconds": round(time() - started, 3),
+                "learning_rate": learning_rate,
                 "n_train": len(train_ids),
                 "n_val": len(val_ids),
+                "stopped_early": False,
                 **{f"train_{key}": value for key, value in train_metrics.items()},
                 **{f"val_{key}": value for key, value in val_metrics.items()},
             }
             history.append(latest_metrics)
-            _append_jsonl(output_dir / "metrics.jsonl", latest_metrics)
-            if val_metrics["loss"] < best_val_loss:
+            if _is_improvement(float(val_metrics["loss"]), best_val_loss, config):
                 best_val_loss = float(val_metrics["loss"])
+                epochs_without_improvement = 0
                 best_metrics = latest_metrics.copy()
                 if config.save_checkpoint:
                     torch.save(
@@ -111,7 +121,20 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
                         },
                         output_dir / "best.pt",
                     )
+            else:
+                epochs_without_improvement += 1
+            should_stop_early = _should_stop_early(epochs_without_improvement, config)
+            latest_metrics["stopped_early"] = should_stop_early
+            _append_jsonl(output_dir / "metrics.jsonl", latest_metrics)
             print(_format_metrics(latest_metrics), flush=True)
+            if scheduler is not None:
+                scheduler.step()
+            if should_stop_early:
+                print(
+                    f"early_stop epoch={epoch} patience={config.early_stopping_patience}",
+                    flush=True,
+                )
+                break
 
         summary = _with_best_metrics(latest_metrics, best_metrics)
         _write_json(output_dir / "summary.json", summary)
@@ -130,6 +153,7 @@ def _train_epoch(
 ) -> dict[str, float]:
     model.train()
     losses: list[float] = []
+    grad_norms: list[float] = []
     for batch in loader:
         tensor_batch = _to_device(batch, device)
         outputs = model(tensor_batch)
@@ -140,9 +164,18 @@ def _train_epoch(
         )
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
+        if config.gradient_clip_norm is not None:
+            grad_norm = torch.nn.utils.clip_grad_norm_(
+                model.parameters(),
+                max_norm=config.gradient_clip_norm,
+            )
+            grad_norms.append(float(grad_norm.item()))
         optimizer.step()
         losses.append(float(loss.item()))
-    return {"loss": _mean(losses)}
+    metrics = {"loss": _mean(losses)}
+    if grad_norms:
+        metrics["grad_norm"] = _mean(grad_norms)
+    return metrics
 
 
 @torch.no_grad()
@@ -204,6 +237,38 @@ def _mean(values: list[float]) -> float:
     if not values:
         return float("nan")
     return float(sum(values) / len(values))
+
+
+def _build_scheduler(
+    optimizer: torch.optim.Optimizer,
+    config: ContrastiveTrainConfig,
+) -> torch.optim.lr_scheduler.LRScheduler | None:
+    if config.lr_scheduler == "none":
+        return None
+    if config.lr_scheduler == "cosine":
+        return torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer,
+            T_max=max(1, config.epochs),
+            eta_min=config.min_learning_rate,
+        )
+    raise ValueError(f"Unknown lr_scheduler {config.lr_scheduler!r}; expected 'none' or 'cosine'")
+
+
+def _is_improvement(
+    val_loss: float,
+    best_val_loss: float,
+    config: ContrastiveTrainConfig,
+) -> bool:
+    return val_loss < best_val_loss - config.early_stopping_min_delta
+
+
+def _should_stop_early(
+    epochs_without_improvement: int,
+    config: ContrastiveTrainConfig,
+) -> bool:
+    if config.early_stopping_patience is None:
+        return False
+    return epochs_without_improvement >= config.early_stopping_patience
 
 
 def _append_jsonl(path: Path, record: dict[str, float | int | str]) -> None:

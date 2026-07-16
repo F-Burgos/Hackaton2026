@@ -40,6 +40,11 @@ def main() -> None:
         epochs=int(cfg.train.epochs),
         learning_rate=float(cfg.train.learning_rate),
         weight_decay=float(cfg.train.weight_decay),
+        gradient_clip_norm=_optional_float(cfg.train.gradient_clip_norm),
+        lr_scheduler=str(cfg.train.lr_scheduler),
+        min_learning_rate=float(cfg.train.min_learning_rate),
+        early_stopping_patience=_optional_int(cfg.train.early_stopping_patience),
+        early_stopping_min_delta=float(cfg.train.early_stopping_min_delta),
         embedding_dim=int(cfg.model.embedding_dim),
         projection_dim=int(cfg.model.projection_dim),
         temperature=float(cfg.train.temperature),
@@ -55,6 +60,12 @@ def _optional_int(value: object) -> int | None:
     if value is None:
         return None
     return int(value)
+
+
+def _optional_float(value: object) -> float | None:
+    if value is None:
+        return None
+    return float(value)
 
 
 if __name__ == "__main__":

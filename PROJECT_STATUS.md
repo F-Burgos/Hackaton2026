@@ -48,6 +48,12 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `positive_cosine_mean`;
   - `negative_cosine_mean`;
   - `positive_negative_margin`.
+- El trainer contrastivo acepta controles configurables de estabilidad:
+  - `train.gradient_clip_norm`;
+  - `train.lr_scheduler=none|cosine`;
+  - `train.min_learning_rate`;
+  - `train.early_stopping_patience`;
+  - `train.early_stopping_min_delta`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en `titae`.
 
 ## Validaciones Recientes

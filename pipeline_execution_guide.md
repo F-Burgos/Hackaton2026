@@ -167,6 +167,19 @@ bash project/scripts/sh/run_contrastive.sh \
   outputs.contrastive_dir=project/results/contrastive/fold0_debug
 ```
 
+Controles opcionales de estabilidad:
+
+```bash
+bash project/scripts/sh/run_contrastive.sh \
+  train.epochs=20 \
+  train.learning_rate=0.0003 \
+  train.gradient_clip_norm=1.0 \
+  train.lr_scheduler=cosine \
+  train.min_learning_rate=0.00001 \
+  train.early_stopping_patience=4 \
+  outputs.contrastive_dir=project/results/contrastive/scheduled_debug
+```
+
 Pruebas:
 
 ```bash

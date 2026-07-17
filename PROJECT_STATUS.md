@@ -38,7 +38,10 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/scripts/sh/report_contrastive_run.sh`: reporte Markdown de entrenamiento/export contrastivo.
 - `project/scripts/sh/diagnose_embeddings.sh`: diagnosticos PCA/kNN/prefijos sobre embeddings exportados, sin downstream.
 - `project/scripts/sh/ranking_diagnostics.sh`: diagnosticos de ranking mediano/MRR desde embeddings exportados.
+- `project/scripts/sh/summarize_contrastive_runs.sh`: tabla agregada CSV/Markdown de runs contrastivos versionados.
 - `project/reports/contrastive_progress_report.md`: reporte agregado del estado contrastivo y gate hacia downstream.
+- `project/reports/contrastive_run_summary.csv`: resumen tabular versionado de metricas contrastivas.
+- `project/reports/contrastive_run_summary.md`: resumen Markdown versionado de metricas contrastivas.
 - `tests/`: pruebas de acceso a datos y forward/loss.
 
 ## Cambios Recientes
@@ -64,6 +67,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `model.dropout`.
 - Entrenamiento/export contrastivo y diagnosticos post-hoc ahora reportan ranking mediano, MRR y percentiles de ranking en ambas direcciones (`image -> spectrum` y `spectrum -> image`), para separar "hay senal latente" de "retrieval@1 ya es confiable".
 - El trainer contrastivo acepta `train.contrastive_accumulation_steps` para calcular la loss sobre varios microbatches concatenados, aumentando el numero de negativos efectivos por paso de optimizacion sin cambiar el batch del dataloader.
+- Existe un agregador reproducible de runs contrastivos que cruza `summary.json` con `export_*/metrics.json` y permite comparar loss, margen, ranking mediano, MRR indirecto/top-k y batch efectivo sin revisar archivos manualmente.
 - El downstream de anomalias queda condicionado a tener primero un modelo contrastivo confiable, con validation estable, margen positivo-negativo sano, retrieval por encima del azar y reportes reproducibles desde `best.pt`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en el servidor remoto.
 
@@ -75,6 +79,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - Servidor remoto:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
   - `.venv/bin/python -m pytest -q`: `14 passed`.
+  - El sweep de temperatura con acumulacion queda pendiente porque se detecto un proceso GPU de otro usuario fuera de `~/Hackaton2026`; no se lanzo entrenamiento para no interferir.
   - Smoke contrastivo con acumulacion de microbatches:
     - run dir: `project/results/contrastive/accum_smoke_20260717`;
     - train/val: `256` / `128`;

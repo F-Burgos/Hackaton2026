@@ -156,6 +156,17 @@ bash project/scripts/sh/diagnose_embeddings.sh \
   --output-dir project/results/contrastive/dry_run_eval/diagnostics
 ```
 
+Generar tabla agregada de runs contrastivos versionados:
+
+```bash
+bash project/scripts/sh/summarize_contrastive_runs.sh
+```
+
+Esto escribe:
+
+- `project/reports/contrastive_run_summary.csv`;
+- `project/reports/contrastive_run_summary.md`.
+
 Overrides utiles:
 
 ```bash

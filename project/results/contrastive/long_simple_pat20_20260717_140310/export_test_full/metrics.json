@@ -1,0 +1,23 @@
+{
+  "checkpoint_path": "project/results/contrastive/long_simple_pat20_20260717_140310/best.pt",
+  "fold": 0,
+  "i2s_recall@1": 0.0019738839473575354,
+  "i2s_recall@10": 0.013969025574624538,
+  "i2s_recall@5": 0.00576981483027339,
+  "image_channel_valid_fraction": 0.5456899382825037,
+  "image_mean_norm": 1.0,
+  "image_mean_std": 0.04923892766237259,
+  "n_objects": 6586,
+  "negative_cosine_mean": 0.3429175019264221,
+  "negative_cosine_std": 0.21720778942108154,
+  "positive_cosine_mean": 0.5745512843132019,
+  "positive_cosine_std": 0.07918967306613922,
+  "positive_negative_margin": 0.23163378238677979,
+  "s2i_recall@1": 0.0013665350852534175,
+  "s2i_recall@10": 0.01229881588369608,
+  "s2i_recall@5": 0.0065290010534226894,
+  "spectrum_mean_norm": 1.0,
+  "spectrum_mean_std": 0.05604144185781479,
+  "spectrum_valid_fraction": 0.3278826820908241,
+  "split": "test"
+}

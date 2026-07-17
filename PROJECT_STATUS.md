@@ -99,6 +99,18 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - validation export: `i2s_recall@1=0.000732`, `s2i_recall@1=0.000244`;
     - full test export: `i2s_recall@1=0.001974`, `s2i_recall@1=0.001215`, `positive_negative_margin=0.2317`;
     - conclusion: mejora loss y margen, pero retrieval sigue insuficiente; downstream sigue bloqueado.
+  - Entrenamiento contrastivo largo con paciencia `20`:
+    - run dir: `project/results/contrastive/long_simple_pat20_20260717_140310`;
+    - train/val: `46213` / `8192`;
+    - epochs maximas: `500`;
+    - early stopping: patience `20`, min delta `0.002`;
+    - early stopping activo en epoca `23`;
+    - `best_epoch=3`;
+    - `best_val_loss=2.9731`;
+    - `best_val_positive_negative_margin=0.1090`;
+    - validation export: `i2s_recall@1=0.000854`, `s2i_recall@1=0.000244`;
+    - full test export: `i2s_recall@1=0.001974`, `s2i_recall@1=0.001367`, `positive_negative_margin=0.2316`;
+    - conclusion: aumentar paciencia no encuentra mejora tardia; confirma sobreajuste despues de epoca `3`.
   - Smoke contrastivo con scheduler/clipping/early stopping:
     - run dir: `project/results/contrastive/scheduled_smoke_20260715`;
     - train/val: `256` / `128`;

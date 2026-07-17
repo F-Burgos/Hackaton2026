@@ -52,6 +52,43 @@ Export desde `best.pt`:
 | validation | 8192 | 0.000732 | 0.003052 | 0.005493 | 0.000244 | 0.002441 | 0.005127 | 0.108973 |
 | test | 6586 | 0.001974 | 0.005618 | 0.013969 | 0.001215 | 0.006833 | 0.012602 | 0.231702 |
 
+## Run Largo Con Paciencia 20
+
+Run:
+
+`project/results/contrastive/long_simple_pat20_20260717_140310`
+
+Configuracion:
+
+- encoder: `simple`;
+- train/validation: `46213` / `8192`;
+- batch size: `32`;
+- epochs maximas: `500`;
+- early stopping patience: `20`;
+- early stopping min delta: `0.002`.
+
+Resultado:
+
+| Campo | Valor |
+|---|---:|
+| best epoch | 3 |
+| stopped early | true, epoch 23 |
+| best train loss | 2.543665 |
+| best val loss | 2.973097 |
+| best val positive-negative margin | 0.108975 |
+| final train loss | 1.496612 |
+| final val loss | 4.473719 |
+| final val positive-negative margin | 0.215250 |
+
+Export desde `best.pt`:
+
+| Split | n | i2s R@1 | i2s R@5 | i2s R@10 | s2i R@1 | s2i R@5 | s2i R@10 | margin |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| validation | 8192 | 0.000854 | 0.002930 | 0.005615 | 0.000244 | 0.002441 | 0.005249 | 0.108975 |
+| test | 6586 | 0.001974 | 0.005770 | 0.013969 | 0.001367 | 0.006529 | 0.012299 | 0.231634 |
+
+La paciencia `20` no encontro una mejora tardia: el mejor checkpoint sigue en epoca `3`. Despues de eso, la train loss sigue bajando, pero la validation loss empeora de forma clara. Esto confirma sobreajuste y refuerza que el siguiente avance no deberia ser simplemente entrenar mas epocas bajo el mismo objetivo.
+
 ## Run Controlado Anterior
 
 Run:
@@ -92,9 +129,9 @@ Export desde `best.pt`:
 
 ## Interpretacion
 
-El run largo aprende una separacion positiva-negativa real: la similitud media de pares correctos supera a la similitud media de negativos por aproximadamente `0.109` en validation y `0.232` en test.
+Los runs largos aprenden una separacion positiva-negativa real: la similitud media de pares correctos supera a la similitud media de negativos por aproximadamente `0.109` en validation y `0.232` en test.
 
-Pero el retrieval sigue debil. Esto sugiere que el modelo aprende una separacion global parcial entre pares positivos y negativos, pero no ordena de forma suficientemente precisa los vecinos cross-modal a escala de miles de objetos. Al aumentar los datos de entrenamiento, la loss mejora y el margen se sostiene, pero no aparece un salto equivalente en retrieval.
+Pero el retrieval sigue debil. Esto sugiere que el modelo aprende una separacion global parcial entre pares positivos y negativos, pero no ordena de forma suficientemente precisa los vecinos cross-modal a escala de miles de objetos. Al aumentar los datos de entrenamiento, la loss mejora y el margen se sostiene, pero no aparece un salto equivalente en retrieval. Aumentar la paciencia de early stopping confirma que el modelo sobreajusta despues de la epoca `3`.
 
 Por ahora no cumple el gate definido para downstream de anomalias.
 
@@ -123,3 +160,8 @@ El siguiente bloque debe concentrarse en mejorar el modelo contrastivo o sus obj
 - `project/results/contrastive/long_simple_20260717_134339/report_test_full.md`
 - `project/results/contrastive/long_simple_20260717_134339/export_val8192/metrics.json`
 - `project/results/contrastive/long_simple_20260717_134339/export_test_full/metrics.json`
+- `project/results/contrastive/long_simple_pat20_20260717_140310/summary.json`
+- `project/results/contrastive/long_simple_pat20_20260717_140310/report_val8192.md`
+- `project/results/contrastive/long_simple_pat20_20260717_140310/report_test_full.md`
+- `project/results/contrastive/long_simple_pat20_20260717_140310/export_val8192/metrics.json`
+- `project/results/contrastive/long_simple_pat20_20260717_140310/export_test_full/metrics.json`

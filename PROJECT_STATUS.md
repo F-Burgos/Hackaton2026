@@ -88,6 +88,19 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - `best_val_i2s_median_rank=50`;
     - `best_val_s2i_median_rank=58`;
     - conclusion: la implementacion y los wrappers funcionan tecnicamente; falta comparar en escala media/larga contra el baseline.
+  - Entrenamiento contrastivo medio con acumulacion de microbatches:
+    - run dir: `project/results/contrastive/accum_medium_20260717_1515`;
+    - train/val: `16384` / `4096`;
+    - `data.batch_size=32`;
+    - `train.contrastive_accumulation_steps=4`;
+    - batch contrastivo efectivo: `128`;
+    - early stopping activo en epoca `8`;
+    - `best_epoch=2`;
+    - `best_val_loss=3.0992`;
+    - `best_val_positive_negative_margin=0.0881`;
+    - validation export: `i2s_recall@1=0.001221`, `s2i_recall@1=0.000732`, i2s median rank `973`, s2i median rank `980`;
+    - test export: `i2s_recall@1=0.000732`, `s2i_recall@1=0.001709`, i2s median rank `945`, s2i median rank `996`;
+    - conclusion: mejora ranking/loss frente a parte del baseline medio, pero reduce el margen positivo-negativo; no desbloquea downstream.
   - Diagnosticos de ranking del run `long_simple_pat20_20260717_140310`:
     - validation `n=8192`: i2s median rank `1587`, s2i median rank `1638`, i2s MRR `0.004293`, s2i MRR `0.003858`;
     - full test `n=6586`: i2s median rank `774`, s2i median rank `764`, i2s MRR `0.008256`, s2i MRR `0.008232`;

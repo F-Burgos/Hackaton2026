@@ -135,11 +135,53 @@ Export desde `best.pt`:
 | validation | 4096 | 0.000244 | 0.004395 | 0.008057 | 0.000488 | 0.003906 | 0.006836 | 0.117905 |
 | test | 4096 | 0.000977 | 0.004395 | 0.009033 | 0.000733 | 0.004395 | 0.010010 | 0.118980 |
 
+## Run Medio Con Batch Contrastivo Efectivo 128
+
+Run:
+
+`project/results/contrastive/accum_medium_20260717_1515`
+
+Configuracion:
+
+- encoder: `simple`;
+- train/validation: `16384` / `4096`;
+- microbatch: `32`;
+- `train.contrastive_accumulation_steps=4`;
+- batch contrastivo efectivo: `128`;
+- epochs maximas: `80`;
+- early stopping patience: `6`;
+- early stopping min delta: `0.002`.
+
+Resultado:
+
+| Campo | Valor |
+|---|---:|
+| best epoch | 2 |
+| stopped early | true, epoch 8 |
+| best train loss | 4.475273 |
+| best val loss | 3.099186 |
+| best val positive-negative margin | 0.088090 |
+| best val i2s median rank | 973 |
+| best val s2i median rank | 980 |
+| best val i2s R@1 | 0.001221 |
+| best val s2i R@1 | 0.000732 |
+
+Export desde `best.pt`:
+
+| Split | n | i2s R@1 | i2s R@5 | i2s R@10 | i2s median rank | s2i R@1 | s2i R@5 | s2i R@10 | s2i median rank | margin |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| validation | 4096 | 0.001221 | 0.005615 | 0.009766 | 973 | 0.000732 | 0.003418 | 0.007568 | 980 | 0.088090 |
+| test | 4096 | 0.000732 | 0.003662 | 0.007812 | 945 | 0.001709 | 0.006348 | 0.011963 | 996 | 0.089010 |
+
+Comparado con `controlled_medium_20260716_213741`, la acumulacion mejora la validation loss (`3.1169` a `3.0992`) y el ranking mediano queda alrededor del percentil `0.76`, pero reduce el margen positivo-negativo (`0.1179` a `0.0881`). Esto sugiere que mas negativos efectivos ayudan al ordenamiento global, aunque todavia no bastan para una alineacion robusta.
+
 ## Interpretacion
 
 Los runs largos aprenden una separacion positiva-negativa real: la similitud media de pares correctos supera a la similitud media de negativos por aproximadamente `0.109` en validation y `0.232` en test.
 
-El diagnostico de ranking matiza la lectura del Recall@1: el par correcto cae en el percentil mediano `0.80` en validation y `0.88` en test, muy por encima de un ranking aleatorio esperado alrededor de `0.50`. Esto indica que el espacio latente contiene senal multimodal util, pero todavia no ordena de forma suficientemente precisa los vecinos cross-modal a escala de miles de objetos. Al aumentar los datos de entrenamiento, la loss mejora y el margen se sostiene, pero no aparece un salto equivalente en retrieval top-k. Aumentar la paciencia de early stopping confirma que el modelo sobreajusta despues de la epoca `3`.
+El diagnostico de ranking matiza la lectura del Recall@1: el par correcto cae en el percentil mediano `0.80` en validation y `0.88` en test para el run largo, muy por encima de un ranking aleatorio esperado alrededor de `0.50`. Esto indica que el espacio latente contiene senal multimodal util, pero todavia no ordena de forma suficientemente precisa los vecinos cross-modal a escala de miles de objetos. Al aumentar los datos de entrenamiento, la loss mejora y el margen se sostiene, pero no aparece un salto equivalente en retrieval top-k. Aumentar la paciencia de early stopping confirma que el modelo sobreajusta despues de la epoca `3`.
+
+La acumulacion contrastiva aporta una mejora tecnica plausible en ranking para escala media, pero no resuelve el problema central. El siguiente cambio deberia evaluar temperatura/loss bajo batch efectivo mayor o pasar a memoria de negativos/hard negatives, siempre comparando validation y test con median rank, MRR y margen.
 
 Por ahora no cumple el gate definido para downstream de anomalias.
 
@@ -175,3 +217,8 @@ El siguiente bloque debe concentrarse en mejorar el modelo contrastivo o sus obj
 - `project/results/contrastive/long_simple_pat20_20260717_140310/export_test_full/metrics.json`
 - `project/results/contrastive/long_simple_pat20_20260717_140310/export_val8192/ranking_metrics.json`
 - `project/results/contrastive/long_simple_pat20_20260717_140310/export_test_full/ranking_metrics.json`
+- `project/results/contrastive/accum_medium_20260717_1515/summary.json`
+- `project/results/contrastive/accum_medium_20260717_1515/report_val4096.md`
+- `project/results/contrastive/accum_medium_20260717_1515/report_test4096.md`
+- `project/results/contrastive/accum_medium_20260717_1515/export_val4096/metrics.json`
+- `project/results/contrastive/accum_medium_20260717_1515/export_test4096/metrics.json`

@@ -40,6 +40,7 @@ def main() -> None:
         epochs=int(cfg.train.epochs),
         learning_rate=float(cfg.train.learning_rate),
         weight_decay=float(cfg.train.weight_decay),
+        contrastive_accumulation_steps=int(cfg.train.contrastive_accumulation_steps),
         gradient_clip_norm=_optional_float(cfg.train.gradient_clip_norm),
         lr_scheduler=str(cfg.train.lr_scheduler),
         min_learning_rate=float(cfg.train.min_learning_rate),

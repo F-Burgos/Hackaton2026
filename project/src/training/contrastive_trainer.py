@@ -34,6 +34,7 @@ class ContrastiveTrainConfig:
     epochs: int = 1
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
+    contrastive_accumulation_steps: int = 1
     gradient_clip_norm: float | None = None
     lr_scheduler: str = "none"
     min_learning_rate: float = 0.0
@@ -52,6 +53,7 @@ class ContrastiveTrainConfig:
 
 
 def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float | int | str]:
+    _validate_config(config)
     torch.manual_seed(config.seed)
     device = _resolve_device(config.device)
     paths = DataPaths.from_root(config.data_root)
@@ -161,28 +163,79 @@ def _train_epoch(
     model.train()
     losses: list[float] = []
     grad_norms: list[float] = []
+    image_embedding_chunks: list[torch.Tensor] = []
+    spectrum_embedding_chunks: list[torch.Tensor] = []
+    optimizer_steps = 0
     for batch in loader:
         tensor_batch = _to_device(batch, device)
         outputs = model(tensor_batch)
-        loss = symmetric_clip_loss(
-            outputs["image_embedding"],
-            outputs["spectrum_embedding"],
-            temperature=config.temperature,
+        image_embedding_chunks.append(outputs["image_embedding"])
+        spectrum_embedding_chunks.append(outputs["spectrum_embedding"])
+        if len(image_embedding_chunks) < config.contrastive_accumulation_steps:
+            continue
+        loss, grad_norm = _optimize_contrastive_group(
+            model,
+            optimizer,
+            config,
+            image_embedding_chunks,
+            spectrum_embedding_chunks,
         )
-        optimizer.zero_grad(set_to_none=True)
-        loss.backward()
-        if config.gradient_clip_norm is not None:
-            grad_norm = torch.nn.utils.clip_grad_norm_(
-                model.parameters(),
-                max_norm=config.gradient_clip_norm,
-            )
-            grad_norms.append(float(grad_norm.item()))
-        optimizer.step()
+        optimizer_steps += 1
+        image_embedding_chunks = []
+        spectrum_embedding_chunks = []
+        if grad_norm is not None:
+            grad_norms.append(grad_norm)
         losses.append(float(loss.item()))
-    metrics = {"loss": _mean(losses)}
+    if image_embedding_chunks:
+        loss, grad_norm = _optimize_contrastive_group(
+            model,
+            optimizer,
+            config,
+            image_embedding_chunks,
+            spectrum_embedding_chunks,
+        )
+        optimizer_steps += 1
+        if grad_norm is not None:
+            grad_norms.append(grad_norm)
+        losses.append(float(loss.item()))
+    metrics = {
+        "loss": _mean(losses),
+        "contrastive_accumulation_steps": float(config.contrastive_accumulation_steps),
+        "effective_contrastive_batch_size": float(
+            config.batch_size * config.contrastive_accumulation_steps
+        ),
+        "optimizer_steps": float(optimizer_steps),
+    }
     if grad_norms:
         metrics["grad_norm"] = _mean(grad_norms)
     return metrics
+
+
+def _optimize_contrastive_group(
+    model: ContrastiveModel,
+    optimizer: torch.optim.Optimizer,
+    config: ContrastiveTrainConfig,
+    image_embedding_chunks: list[torch.Tensor],
+    spectrum_embedding_chunks: list[torch.Tensor],
+) -> tuple[torch.Tensor, float | None]:
+    image_embedding = torch.cat(image_embedding_chunks, dim=0)
+    spectrum_embedding = torch.cat(spectrum_embedding_chunks, dim=0)
+    loss = symmetric_clip_loss(
+        image_embedding,
+        spectrum_embedding,
+        temperature=config.temperature,
+    )
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    grad_norm = None
+    if config.gradient_clip_norm is not None:
+        clipped_grad_norm = torch.nn.utils.clip_grad_norm_(
+            model.parameters(),
+            max_norm=config.gradient_clip_norm,
+        )
+        grad_norm = float(clipped_grad_norm.item())
+    optimizer.step()
+    return loss.detach(), grad_norm
 
 
 @torch.no_grad()
@@ -234,6 +287,11 @@ def _resolve_device(device: str) -> torch.device:
     if device == "auto":
         return torch.device("cuda" if torch.cuda.is_available() else "cpu")
     return torch.device(device)
+
+
+def _validate_config(config: ContrastiveTrainConfig) -> None:
+    if config.contrastive_accumulation_steps < 1:
+        raise ValueError("contrastive_accumulation_steps must be >= 1")
 
 
 def _limit(values: tuple[str, ...], max_items: int | None) -> tuple[str, ...]:

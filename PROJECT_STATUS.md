@@ -63,6 +63,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `model.encoder_width`;
   - `model.dropout`.
 - Entrenamiento/export contrastivo y diagnosticos post-hoc ahora reportan ranking mediano, MRR y percentiles de ranking en ambas direcciones (`image -> spectrum` y `spectrum -> image`), para separar "hay senal latente" de "retrieval@1 ya es confiable".
+- El trainer contrastivo acepta `train.contrastive_accumulation_steps` para calcular la loss sobre varios microbatches concatenados, aumentando el numero de negativos efectivos por paso de optimizacion sin cambiar el batch del dataloader.
 - El downstream de anomalias queda condicionado a tener primero un modelo contrastivo confiable, con validation estable, margen positivo-negativo sano, retrieval por encima del azar y reportes reproducibles desde `best.pt`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en el servidor remoto.
 
@@ -217,8 +218,8 @@ Siguiente bloque recomendado:
 
 1. Mejorar el entrenamiento/modelo contrastivo base:
    - revisar capacidad de encoders;
-   - probar scheduler/early stopping;
-   - considerar hard negatives o memoria de negativos;
+   - probar batch contrastivo efectivo mediante `train.contrastive_accumulation_steps`;
+   - considerar hard negatives o memoria de negativos si la acumulacion no mejora ranking;
    - revisar normalizacion por canal/modalidad.
 2. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
 3. Exportar embeddings de validation/test filtrados desde checkpoints realmente competitivos.

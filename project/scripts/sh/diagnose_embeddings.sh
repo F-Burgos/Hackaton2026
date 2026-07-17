@@ -3,5 +3,6 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "${ROOT_DIR}"
+source project/scripts/sh/_python.sh
 
-python project/scripts/diagnose_embeddings.py "$@"
+"$(resolve_project_python)" project/scripts/diagnose_embeddings.py "$@"

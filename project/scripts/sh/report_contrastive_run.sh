@@ -3,5 +3,6 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "${ROOT_DIR}"
+source project/scripts/sh/_python.sh
 
-python project/scripts/report_contrastive_run.py "$@"
+"$(resolve_project_python)" project/scripts/report_contrastive_run.py "$@"

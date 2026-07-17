@@ -180,6 +180,24 @@ bash project/scripts/sh/run_contrastive.sh \
   outputs.contrastive_dir=project/results/contrastive/scheduled_debug
 ```
 
+Batch contrastivo efectivo con acumulacion de microbatches:
+
+```bash
+bash project/scripts/sh/run_contrastive.sh \
+  data.batch_size=32 \
+  train.contrastive_accumulation_steps=4 \
+  train.epochs=20 \
+  train.learning_rate=0.0003 \
+  train.gradient_clip_norm=1.0 \
+  train.lr_scheduler=cosine \
+  train.early_stopping_patience=6 \
+  outputs.contrastive_dir=project/results/contrastive/accum_debug
+```
+
+Esta opcion calcula la loss contrastiva sobre `batch_size * contrastive_accumulation_steps`
+pares antes de cada paso de optimizacion. Sirve para probar mas negativos por update sin
+subir directamente el batch del dataloader.
+
 Variante opcional de encoders con bloques residuales:
 
 ```bash

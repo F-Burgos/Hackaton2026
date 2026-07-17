@@ -79,6 +79,17 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - `best_epoch=1`;
     - `best_val_loss=3.4658`;
     - `best_val_positive_negative_margin=0.000016`;
+  - Smoke contrastivo con encoder residual:
+    - run dir: `project/results/contrastive/residual_smoke_20260716`;
+    - train/val: `512` / `128`;
+    - `model.encoder_variant=residual`;
+    - `model.encoder_width=0.5`;
+    - `model.dropout=0.1`;
+    - early stopping activo en epoca `3`;
+    - `best_epoch=1`;
+    - `best_val_loss=3.4658`;
+    - `best_val_positive_negative_margin=-0.0000004`;
+    - conclusion inicial: la variante residual funciona tecnicamente, pero este smoke no muestra mejora clara frente al baseline.
   - Entrenamiento contrastivo debug:
     - checkpoint: `project/results/contrastive/remote_debug_20260715_150747/best.pt`;
     - `train_loss=2.0965`;

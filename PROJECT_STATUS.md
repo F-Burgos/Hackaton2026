@@ -37,6 +37,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/scripts/sh/export_contrastive_embeddings.sh`: export de embeddings y metricas retrieval desde checkpoint.
 - `project/scripts/sh/report_contrastive_run.sh`: reporte Markdown de entrenamiento/export contrastivo.
 - `project/scripts/sh/diagnose_embeddings.sh`: diagnosticos PCA/kNN/prefijos sobre embeddings exportados, sin downstream.
+- `project/reports/contrastive_progress_report.md`: reporte agregado del estado contrastivo y gate hacia downstream.
 - `tests/`: pruebas de acceso a datos y forward/loss.
 
 ## Cambios Recientes
@@ -70,7 +71,20 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - Los tests Torch se saltan localmente si Torch no esta instalado para Python 3.10.
 - Servidor remoto:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
-  - `.venv/bin/python -m pytest -q`: `12 passed`.
+  - `.venv/bin/python -m pytest -q`: `14 passed`.
+  - Entrenamiento contrastivo controlado:
+    - run dir: `project/results/contrastive/controlled_medium_20260716_213741`;
+    - train/val: `16384` / `4096`;
+    - encoder: `simple`;
+    - scheduler: `cosine`;
+    - gradient clipping: `1.0`;
+    - early stopping activo en epoca `7`;
+    - `best_epoch=3`;
+    - `best_val_loss=3.1169`;
+    - `best_val_positive_negative_margin=0.1179`;
+    - validation export: `i2s_recall@1=0.000244`, `s2i_recall@1=0.000488`;
+    - test export: `i2s_recall@1=0.000977`, `s2i_recall@1=0.000733`;
+    - conclusion: aprende margen positivo-negativo, pero retrieval sigue bajo; no cumple gate para downstream.
   - Smoke contrastivo con scheduler/clipping/early stopping:
     - run dir: `project/results/contrastive/scheduled_smoke_20260715`;
     - train/val: `256` / `128`;

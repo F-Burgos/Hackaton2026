@@ -139,5 +139,6 @@ Rules:
 - [Dataset structure](data/reports/dataset_structure_report.md)
 - [Anomaly research plan](data/reports/anomaly_research_plan.md)
 - [Implementation roadmap](data/reports/implementation_roadmap.md)
+- [Contrastive progress](project/reports/contrastive_progress_report.md)
 
 `CLAUDE.md` is ignored and kept only as local reference. The versioned workflow instructions are in [Codex.md](Codex.md).

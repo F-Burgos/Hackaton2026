@@ -75,6 +75,19 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - Servidor remoto:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
   - `.venv/bin/python -m pytest -q`: `14 passed`.
+  - Smoke contrastivo con acumulacion de microbatches:
+    - run dir: `project/results/contrastive/accum_smoke_20260717`;
+    - train/val: `256` / `128`;
+    - `data.batch_size=16`;
+    - `train.contrastive_accumulation_steps=2`;
+    - batch contrastivo efectivo reportado: `32`;
+    - epochs: `2`;
+    - `best_epoch=2`;
+    - `best_train_loss=3.3196`;
+    - `best_val_loss=2.7434`;
+    - `best_val_i2s_median_rank=50`;
+    - `best_val_s2i_median_rank=58`;
+    - conclusion: la implementacion y los wrappers funcionan tecnicamente; falta comparar en escala media/larga contra el baseline.
   - Diagnosticos de ranking del run `long_simple_pat20_20260717_140310`:
     - validation `n=8192`: i2s median rank `1587`, s2i median rank `1638`, i2s MRR `0.004293`, s2i MRR `0.003858`;
     - full test `n=6586`: i2s median rank `774`, s2i median rank `764`, i2s MRR `0.008256`, s2i MRR `0.008232`;

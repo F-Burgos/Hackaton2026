@@ -92,7 +92,7 @@ def summarize_runs(results_root: Path) -> list[dict[str, object]]:
 def write_csv(rows: list[dict[str, object]], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=SUMMARY_COLUMNS)
+        writer = csv.DictWriter(handle, fieldnames=SUMMARY_COLUMNS, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({column: row.get(column, "") for column in SUMMARY_COLUMNS})

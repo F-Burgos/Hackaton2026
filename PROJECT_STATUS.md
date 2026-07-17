@@ -106,6 +106,14 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - validation export: `i2s_recall@1=0.001221`, `s2i_recall@1=0.000732`, i2s median rank `973`, s2i median rank `980`;
     - test export: `i2s_recall@1=0.000732`, `s2i_recall@1=0.001709`, i2s median rank `945`, s2i median rank `996`;
     - conclusion: mejora ranking/loss frente a parte del baseline medio, pero reduce el margen positivo-negativo; no desbloquea downstream.
+  - Sweep de temperatura con batch contrastivo efectivo `128`:
+    - sweep dir: `project/results/contrastive/accum_temp_sweep_20260717_1918`;
+    - configs: `temp=0.03`, `temp=0.07`, `temp=0.10`;
+    - train/val por config: `16384` / `4096`;
+    - `temp=0.03`: mejor validation loss `3.0976`, pero margen bajo `0.0380`;
+    - `temp=0.07`: reproduce el run acumulado medio, validation loss `3.0992`, margen `0.0881`;
+    - `temp=0.10`: validation loss `3.1110`, margen `0.1490`, test i2s/s2i median rank `934` / `945`;
+    - conclusion: `temp=0.10` recupera margen y mejora ranking test, por lo que es el candidato mas razonable para escalar con acumulacion; downstream sigue bloqueado.
   - Diagnosticos de ranking del run `long_simple_pat20_20260717_140310`:
     - validation `n=8192`: i2s median rank `1587`, s2i median rank `1638`, i2s MRR `0.004293`, s2i MRR `0.003858`;
     - full test `n=6586`: i2s median rank `774`, s2i median rank `764`, i2s MRR `0.008256`, s2i MRR `0.008232`;

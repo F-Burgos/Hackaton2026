@@ -175,6 +175,34 @@ Export desde `best.pt`:
 
 Comparado con `controlled_medium_20260716_213741`, la acumulacion mejora la validation loss (`3.1169` a `3.0992`) y el ranking mediano queda alrededor del percentil `0.76`, pero reduce el margen positivo-negativo (`0.1179` a `0.0881`). Esto sugiere que mas negativos efectivos ayudan al ordenamiento global, aunque todavia no bastan para una alineacion robusta.
 
+## Sweep Temperatura Con Batch Efectivo 128
+
+Sweep:
+
+`project/results/contrastive/accum_temp_sweep_20260717_1918`
+
+Configuracion comun:
+
+- encoder: `simple`;
+- train/validation: `16384` / `4096`;
+- microbatch: `32`;
+- `train.contrastive_accumulation_steps=4`;
+- batch contrastivo efectivo: `128`;
+- temperaturas: `0.03`, `0.07`, `0.10`.
+
+Resultados exportados desde `best.pt`:
+
+| Temp | Split | best epoch | val loss | val margin | i2s R@1 | s2i R@1 | i2s median rank | s2i median rank | export margin |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.03 | validation | 2 | 3.097617 | 0.038049 | 0.001221 | 0.001221 | 969 | 986 | 0.038049 |
+| 0.03 | test | 2 | 3.097617 | 0.038049 | 0.000244 | 0.001953 | 967 | 949 | 0.038653 |
+| 0.07 | validation | 2 | 3.099186 | 0.088090 | 0.001221 | 0.000732 | 973 | 980 | 0.088090 |
+| 0.07 | test | 2 | 3.099186 | 0.088090 | 0.000732 | 0.001709 | 945 | 996 | 0.089010 |
+| 0.10 | validation | 4 | 3.111043 | 0.149029 | 0.000977 | 0.000732 | 985 | 1009 | 0.149029 |
+| 0.10 | test | 4 | 3.111043 | 0.149029 | 0.001465 | 0.001465 | 934 | 945 | 0.150087 |
+
+La temperatura `0.03` optimiza levemente la validation loss, pero deja un margen demasiado bajo. La temperatura `0.10` sacrifica un poco de validation loss y validation rank, pero mejora el margen y el ranking mediano en test. Para el siguiente run escalado con acumulacion, `temp=0.10` es el candidato mas defendible.
+
 ## Interpretacion
 
 Los runs largos aprenden una separacion positiva-negativa real: la similitud media de pares correctos supera a la similitud media de negativos por aproximadamente `0.109` en validation y `0.232` en test.
@@ -222,3 +250,12 @@ El siguiente bloque debe concentrarse en mejorar el modelo contrastivo o sus obj
 - `project/results/contrastive/accum_medium_20260717_1515/report_test4096.md`
 - `project/results/contrastive/accum_medium_20260717_1515/export_val4096/metrics.json`
 - `project/results/contrastive/accum_medium_20260717_1515/export_test4096/metrics.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp003/summary.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp003/export_val4096/metrics.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp003/export_test4096/metrics.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp007/summary.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp007/export_val4096/metrics.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp007/export_test4096/metrics.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp010/summary.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp010/export_val4096/metrics.json`
+- `project/results/contrastive/accum_temp_sweep_20260717_1918/temp010/export_test4096/metrics.json`

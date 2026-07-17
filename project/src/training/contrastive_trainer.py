@@ -16,6 +16,7 @@ from project.src.evaluation.data_quality import batch_quality_metrics, mean_metr
 from project.src.evaluation.retrieval import (
     embedding_diagnostics,
     pair_similarity_diagnostics,
+    ranking_metrics,
     recall_at_k,
 )
 from project.src.models.contrastive import ContrastiveModel
@@ -216,6 +217,8 @@ def _evaluate(
         "loss": _mean(losses),
         **{f"i2s_{key}": value for key, value in image_to_spectrum.items()},
         **{f"s2i_{key}": value for key, value in spectrum_to_image.items()},
+        **{f"i2s_{key}": value for key, value in ranking_metrics(image, spectrum).items()},
+        **{f"s2i_{key}": value for key, value in ranking_metrics(spectrum, image).items()},
         **embedding_diagnostics(image, "image"),
         **embedding_diagnostics(spectrum, "spectrum"),
         **pair_similarity_diagnostics(image, spectrum),

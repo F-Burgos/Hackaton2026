@@ -29,6 +29,36 @@ def recall_at_k(
 
 
 @torch.no_grad()
+def ranking_metrics(
+    query_embeddings: torch.Tensor,
+    target_embeddings: torch.Tensor,
+) -> dict[str, float]:
+    if query_embeddings.shape != target_embeddings.shape:
+        raise ValueError(
+            "Expected paired embeddings with matching shapes, got "
+            f"{query_embeddings.shape} and {target_embeddings.shape}"
+        )
+    if query_embeddings.ndim != 2:
+        raise ValueError(f"Expected 2D embeddings, got {query_embeddings.ndim}D")
+
+    similarity = query_embeddings @ target_embeddings.T
+    labels = torch.arange(similarity.shape[0], device=similarity.device)
+    positive_scores = similarity[labels, labels]
+    ranks = (similarity > positive_scores[:, None]).sum(dim=1).float() + 1.0
+    n_targets = float(similarity.shape[1])
+    percentile = 1.0 - (ranks - 1.0) / max(n_targets - 1.0, 1.0)
+    return {
+        "mean_rank": float(ranks.mean().item()),
+        "median_rank": float(ranks.median().item()),
+        "mrr": float((1.0 / ranks).mean().item()),
+        "rank_percentile_mean": float(percentile.mean().item()),
+        "rank_percentile_median": float(percentile.median().item()),
+        "rank_p10": float(torch.quantile(ranks, 0.10).item()),
+        "rank_p90": float(torch.quantile(ranks, 0.90).item()),
+    }
+
+
+@torch.no_grad()
 def embedding_diagnostics(embeddings: torch.Tensor, prefix: str) -> dict[str, float]:
     return {
         f"{prefix}_mean_norm": float(embeddings.norm(dim=1).mean().item()),

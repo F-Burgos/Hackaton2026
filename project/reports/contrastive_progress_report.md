@@ -1,6 +1,6 @@
 # Contrastive Progress Report
 
-Fecha: 2026-07-16
+Fecha: 2026-07-17
 
 ## Estado
 
@@ -14,6 +14,45 @@ La evidencia actual muestra:
 - el retrieval cross-modal sigue muy bajo, cercano al azar para validation/test grandes.
 
 ## Run Controlado Mas Reciente
+
+Run largo:
+
+`project/results/contrastive/long_simple_20260717_134339`
+
+Configuracion:
+
+- encoder: `simple`;
+- train/validation: `46213` / `8192`;
+- batch size: `32`;
+- epochs maximas: `80`;
+- learning rate inicial: `0.0003`;
+- scheduler: `cosine`;
+- gradient clipping: `1.0`;
+- early stopping patience: `8`;
+- early stopping min delta: `0.002`.
+
+Resultado entrenamiento:
+
+| Campo | Valor |
+|---|---:|
+| best epoch | 3 |
+| stopped early | true, epoch 11 |
+| best train loss | 2.543592 |
+| best val loss | 2.973322 |
+| best val positive cosine mean | 0.553389 |
+| best val negative cosine mean | 0.444415 |
+| best val positive-negative margin | 0.108973 |
+| best val i2s R@1 | 0.000732 |
+| best val s2i R@1 | 0.000244 |
+
+Export desde `best.pt`:
+
+| Split | n | i2s R@1 | i2s R@5 | i2s R@10 | s2i R@1 | s2i R@5 | s2i R@10 | margin |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| validation | 8192 | 0.000732 | 0.003052 | 0.005493 | 0.000244 | 0.002441 | 0.005127 | 0.108973 |
+| test | 6586 | 0.001974 | 0.005618 | 0.013969 | 0.001215 | 0.006833 | 0.012602 | 0.231702 |
+
+## Run Controlado Anterior
 
 Run:
 
@@ -53,9 +92,9 @@ Export desde `best.pt`:
 
 ## Interpretacion
 
-El run controlado aprende una separacion positiva-negativa real: la similitud media de pares correctos supera a la similitud media de negativos por aproximadamente `0.118`.
+El run largo aprende una separacion positiva-negativa real: la similitud media de pares correctos supera a la similitud media de negativos por aproximadamente `0.109` en validation y `0.232` en test.
 
-Pero el retrieval sigue debil. Esto sugiere que el modelo aprende una separacion global parcial entre pares positivos y negativos, pero no ordena de forma suficientemente precisa los vecinos cross-modal a escala de miles de objetos.
+Pero el retrieval sigue debil. Esto sugiere que el modelo aprende una separacion global parcial entre pares positivos y negativos, pero no ordena de forma suficientemente precisa los vecinos cross-modal a escala de miles de objetos. Al aumentar los datos de entrenamiento, la loss mejora y el margen se sostiene, pero no aparece un salto equivalente en retrieval.
 
 Por ahora no cumple el gate definido para downstream de anomalias.
 
@@ -79,3 +118,8 @@ El siguiente bloque debe concentrarse en mejorar el modelo contrastivo o sus obj
 - `project/results/contrastive/controlled_medium_20260716_213741/report_test4096.md`
 - `project/results/contrastive/controlled_medium_20260716_213741/export_val4096/metrics.json`
 - `project/results/contrastive/controlled_medium_20260716_213741/export_test4096/metrics.json`
+- `project/results/contrastive/long_simple_20260717_134339/summary.json`
+- `project/results/contrastive/long_simple_20260717_134339/report_val8192.md`
+- `project/results/contrastive/long_simple_20260717_134339/report_test_full.md`
+- `project/results/contrastive/long_simple_20260717_134339/export_val8192/metrics.json`
+- `project/results/contrastive/long_simple_20260717_134339/export_test_full/metrics.json`

@@ -85,6 +85,20 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - validation export: `i2s_recall@1=0.000244`, `s2i_recall@1=0.000488`;
     - test export: `i2s_recall@1=0.000977`, `s2i_recall@1=0.000733`;
     - conclusion: aprende margen positivo-negativo, pero retrieval sigue bajo; no cumple gate para downstream.
+  - Entrenamiento contrastivo largo:
+    - run dir: `project/results/contrastive/long_simple_20260717_134339`;
+    - train/val: `46213` / `8192`;
+    - encoder: `simple`;
+    - scheduler: `cosine`;
+    - gradient clipping: `1.0`;
+    - early stopping: patience `8`, min delta `0.002`;
+    - early stopping activo en epoca `11`;
+    - `best_epoch=3`;
+    - `best_val_loss=2.9733`;
+    - `best_val_positive_negative_margin=0.1090`;
+    - validation export: `i2s_recall@1=0.000732`, `s2i_recall@1=0.000244`;
+    - full test export: `i2s_recall@1=0.001974`, `s2i_recall@1=0.001215`, `positive_negative_margin=0.2317`;
+    - conclusion: mejora loss y margen, pero retrieval sigue insuficiente; downstream sigue bloqueado.
   - Smoke contrastivo con scheduler/clipping/early stopping:
     - run dir: `project/results/contrastive/scheduled_smoke_20260715`;
     - train/val: `256` / `128`;

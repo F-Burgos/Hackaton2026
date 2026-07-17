@@ -11,7 +11,8 @@ La evidencia actual muestra:
 - la normalizacion por muestra mejoro fuertemente la validation loss;
 - los controles de entrenamiento funcionan tecnicamente;
 - el margen positivo-negativo puede ser claramente mayor que cero;
-- el retrieval cross-modal sigue muy bajo, cercano al azar para validation/test grandes.
+- el retrieval cross-modal top-k sigue muy bajo para validation/test grandes;
+- el ranking mediano confirma que ya hay estructura latente parcial, aunque no alcanza precision objeto-a-objeto.
 
 ## Run Controlado Mas Reciente
 
@@ -87,6 +88,13 @@ Export desde `best.pt`:
 | validation | 8192 | 0.000854 | 0.002930 | 0.005615 | 0.000244 | 0.002441 | 0.005249 | 0.108975 |
 | test | 6586 | 0.001974 | 0.005770 | 0.013969 | 0.001367 | 0.006529 | 0.012299 | 0.231634 |
 
+Diagnostico de ranking desde embeddings exportados:
+
+| Split | n | i2s median rank | i2s MRR | i2s median percentile | s2i median rank | s2i MRR | s2i median percentile |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| validation | 8192 | 1587 | 0.004293 | 0.8064 | 1638 | 0.003858 | 0.8001 |
+| test | 6586 | 774 | 0.008256 | 0.8826 | 764 | 0.008232 | 0.8841 |
+
 La paciencia `20` no encontro una mejora tardia: el mejor checkpoint sigue en epoca `3`. Despues de eso, la train loss sigue bajando, pero la validation loss empeora de forma clara. Esto confirma sobreajuste y refuerza que el siguiente avance no deberia ser simplemente entrenar mas epocas bajo el mismo objetivo.
 
 ## Run Controlado Anterior
@@ -131,7 +139,7 @@ Export desde `best.pt`:
 
 Los runs largos aprenden una separacion positiva-negativa real: la similitud media de pares correctos supera a la similitud media de negativos por aproximadamente `0.109` en validation y `0.232` en test.
 
-Pero el retrieval sigue debil. Esto sugiere que el modelo aprende una separacion global parcial entre pares positivos y negativos, pero no ordena de forma suficientemente precisa los vecinos cross-modal a escala de miles de objetos. Al aumentar los datos de entrenamiento, la loss mejora y el margen se sostiene, pero no aparece un salto equivalente en retrieval. Aumentar la paciencia de early stopping confirma que el modelo sobreajusta despues de la epoca `3`.
+El diagnostico de ranking matiza la lectura del Recall@1: el par correcto cae en el percentil mediano `0.80` en validation y `0.88` en test, muy por encima de un ranking aleatorio esperado alrededor de `0.50`. Esto indica que el espacio latente contiene senal multimodal util, pero todavia no ordena de forma suficientemente precisa los vecinos cross-modal a escala de miles de objetos. Al aumentar los datos de entrenamiento, la loss mejora y el margen se sostiene, pero no aparece un salto equivalente en retrieval top-k. Aumentar la paciencia de early stopping confirma que el modelo sobreajusta despues de la epoca `3`.
 
 Por ahora no cumple el gate definido para downstream de anomalias.
 
@@ -165,3 +173,5 @@ El siguiente bloque debe concentrarse en mejorar el modelo contrastivo o sus obj
 - `project/results/contrastive/long_simple_pat20_20260717_140310/report_test_full.md`
 - `project/results/contrastive/long_simple_pat20_20260717_140310/export_val8192/metrics.json`
 - `project/results/contrastive/long_simple_pat20_20260717_140310/export_test_full/metrics.json`
+- `project/results/contrastive/long_simple_pat20_20260717_140310/export_val8192/ranking_metrics.json`
+- `project/results/contrastive/long_simple_pat20_20260717_140310/export_test_full/ranking_metrics.json`

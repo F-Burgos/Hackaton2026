@@ -1,6 +1,6 @@
 # Hackaton2026 Project Status
 
-Ultima actualizacion: 2026-07-16
+Ultima actualizacion: 2026-07-17
 
 ## Estado Actual
 
@@ -37,6 +37,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/scripts/sh/export_contrastive_embeddings.sh`: export de embeddings y metricas retrieval desde checkpoint.
 - `project/scripts/sh/report_contrastive_run.sh`: reporte Markdown de entrenamiento/export contrastivo.
 - `project/scripts/sh/diagnose_embeddings.sh`: diagnosticos PCA/kNN/prefijos sobre embeddings exportados, sin downstream.
+- `project/scripts/sh/ranking_diagnostics.sh`: diagnosticos de ranking mediano/MRR desde embeddings exportados.
 - `project/reports/contrastive_progress_report.md`: reporte agregado del estado contrastivo y gate hacia downstream.
 - `tests/`: pruebas de acceso a datos y forward/loss.
 
@@ -61,6 +62,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `model.encoder_variant`;
   - `model.encoder_width`;
   - `model.dropout`.
+- Entrenamiento/export contrastivo y diagnosticos post-hoc ahora reportan ranking mediano, MRR y percentiles de ranking en ambas direcciones (`image -> spectrum` y `spectrum -> image`), para separar "hay senal latente" de "retrieval@1 ya es confiable".
 - El downstream de anomalias queda condicionado a tener primero un modelo contrastivo confiable, con validation estable, margen positivo-negativo sano, retrieval por encima del azar y reportes reproducibles desde `best.pt`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en el servidor remoto.
 
@@ -72,6 +74,10 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - Servidor remoto:
   - `setup_env.sh` valida Python 3.10 + Torch `2.9.1+cu128` con CUDA disponible.
   - `.venv/bin/python -m pytest -q`: `14 passed`.
+  - Diagnosticos de ranking del run `long_simple_pat20_20260717_140310`:
+    - validation `n=8192`: i2s median rank `1587`, s2i median rank `1638`, i2s MRR `0.004293`, s2i MRR `0.003858`;
+    - full test `n=6586`: i2s median rank `774`, s2i median rank `764`, i2s MRR `0.008256`, s2i MRR `0.008232`;
+    - interpretacion: hay estructura latente por encima del azar, pero aun no precision suficiente para usar el espacio como detector confiable de anomalias.
   - Entrenamiento contrastivo controlado:
     - run dir: `project/results/contrastive/controlled_medium_20260716_213741`;
     - train/val: `16384` / `4096`;

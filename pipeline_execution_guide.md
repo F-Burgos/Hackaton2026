@@ -219,6 +219,16 @@ Loss contrastivas soportadas:
 `train.temperature` se trata como hiperparametro fijo. No se entrena como parametro
 del modelo en la implementacion actual.
 
+Busqueda HPO enfocada en temperatura, learning rate y loss:
+
+```bash
+SWEEP_DIR=project/results/contrastive/hpo_loss_lr_temp_YYYYMMDD_HHMM \
+  bash project/scripts/sh/run_contrastive_hpo_grid.sh
+```
+
+La grilla por defecto evalua learning rates `0.0001`, `0.0003` y `0.001`,
+temperaturas `0.10` y `0.15`, y las tres losses contrastivas soportadas.
+
 Variante opcional de encoders con bloques residuales:
 
 ```bash

@@ -6,7 +6,7 @@ torch = pytest.importorskip("torch")
 
 from project.src.models.contrastive import ContrastiveModel
 from project.src.models.contrastive import _masked_standardize_sequence
-from project.src.models.losses import symmetric_clip_loss
+from project.src.models.losses import info_nce_loss, symmetric_clip_loss, symmetric_info_nce_loss
 
 
 def test_contrastive_forward_and_loss() -> None:
@@ -62,3 +62,23 @@ def test_masked_sequence_standardization_ignores_invalid_values() -> None:
 def test_encoder_width_must_be_positive() -> None:
     with pytest.raises(ValueError, match="encoder_width"):
         ContrastiveModel(encoder_width=0.0)
+
+
+def test_symmetric_clip_loss_aliases_symmetric_info_nce() -> None:
+    image_embedding = torch.eye(4)
+    spectrum_embedding = torch.eye(4)
+
+    old_name = symmetric_clip_loss(image_embedding, spectrum_embedding)
+    explicit_name = symmetric_info_nce_loss(image_embedding, spectrum_embedding)
+
+    assert torch.isclose(old_name, explicit_name)
+
+
+def test_info_nce_loss_is_directional_cross_entropy() -> None:
+    query_embedding = torch.eye(3)
+    target_embedding = torch.eye(3)
+
+    loss = info_nce_loss(query_embedding, target_embedding, temperature=0.07)
+
+    assert torch.isfinite(loss)
+    assert loss < 1e-4

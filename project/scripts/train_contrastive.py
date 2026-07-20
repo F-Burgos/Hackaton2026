@@ -46,6 +46,7 @@ def main() -> None:
         min_learning_rate=float(cfg.train.min_learning_rate),
         early_stopping_patience=_optional_int(cfg.train.early_stopping_patience),
         early_stopping_min_delta=float(cfg.train.early_stopping_min_delta),
+        contrastive_loss=str(cfg.train.contrastive_loss),
         embedding_dim=int(cfg.model.embedding_dim),
         projection_dim=int(cfg.model.projection_dim),
         encoder_width=float(cfg.model.encoder_width),

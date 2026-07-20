@@ -15,3 +15,10 @@ def test_contrastive_accumulation_steps_must_be_positive() -> None:
 
     with pytest.raises(ValueError, match="contrastive_accumulation_steps"):
         _validate_config(config)
+
+
+def test_contrastive_loss_name_must_be_supported() -> None:
+    config = ContrastiveTrainConfig(contrastive_loss="not_a_loss")
+
+    with pytest.raises(ValueError, match="contrastive_loss"):
+        _validate_config(config)

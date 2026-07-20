@@ -183,6 +183,7 @@ Controles opcionales de estabilidad:
 ```bash
 bash project/scripts/sh/run_contrastive.sh \
   train.epochs=20 \
+  train.contrastive_loss=symmetric_info_nce \
   train.learning_rate=0.0003 \
   train.gradient_clip_norm=1.0 \
   train.lr_scheduler=cosine \
@@ -208,6 +209,12 @@ bash project/scripts/sh/run_contrastive.sh \
 Esta opcion calcula la loss contrastiva sobre `batch_size * contrastive_accumulation_steps`
 pares antes de cada paso de optimizacion. Sirve para probar mas negativos por update sin
 subir directamente el batch del dataloader.
+
+Loss contrastivas soportadas:
+
+- `symmetric_info_nce`: InfoNCE bidireccional imagen->espectro y espectro->imagen; es el default y corresponde a la loss tipo CLIP usada en los runs previos.
+- `image_to_spectrum_info_nce`: InfoNCE direccional imagen->espectro.
+- `spectrum_to_image_info_nce`: InfoNCE direccional espectro->imagen.
 
 Variante opcional de encoders con bloques residuales:
 

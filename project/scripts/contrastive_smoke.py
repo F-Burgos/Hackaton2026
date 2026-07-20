@@ -18,7 +18,7 @@ from project.src.data.partitions import load_fold
 from project.src.data.paths import DataPaths
 from project.src.data.torch_datasets import TorchMultimodalPairDataset, multimodal_collate
 from project.src.models.contrastive import ContrastiveModel
-from project.src.models.losses import retrieval_at_1, symmetric_clip_loss
+from project.src.models.losses import retrieval_at_1, symmetric_info_nce_loss
 
 
 def main() -> None:
@@ -52,7 +52,7 @@ def main() -> None:
     for step, batch in enumerate(loader, start=1):
         tensor_batch = {key: value for key, value in batch.items() if isinstance(value, torch.Tensor)}
         outputs = model(tensor_batch)
-        loss = symmetric_clip_loss(outputs["image_embedding"], outputs["spectrum_embedding"])
+        loss = symmetric_info_nce_loss(outputs["image_embedding"], outputs["spectrum_embedding"])
         if not torch.isfinite(loss):
             raise RuntimeError(f"Non-finite loss at step {step}: {loss.item()}")
         optimizer.zero_grad(set_to_none=True)

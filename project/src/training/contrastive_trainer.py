@@ -20,7 +20,7 @@ from project.src.evaluation.retrieval import (
     recall_at_k,
 )
 from project.src.models.contrastive import ContrastiveModel
-from project.src.models.losses import symmetric_clip_loss
+from project.src.models.losses import info_nce_loss, symmetric_info_nce_loss
 
 
 @dataclass(frozen=True)
@@ -40,6 +40,7 @@ class ContrastiveTrainConfig:
     min_learning_rate: float = 0.0
     early_stopping_patience: int | None = None
     early_stopping_min_delta: float = 0.0
+    contrastive_loss: str = "symmetric_info_nce"
     embedding_dim: int = 128
     projection_dim: int = 128
     encoder_width: float = 1.0
@@ -112,6 +113,8 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
                 "learning_rate": learning_rate,
                 "n_train": len(train_ids),
                 "n_val": len(val_ids),
+                "contrastive_loss": config.contrastive_loss,
+                "temperature": config.temperature,
                 "stopped_early": False,
                 **{f"train_{key}": value for key, value in train_metrics.items()},
                 **{f"val_{key}": value for key, value in val_metrics.items()},
@@ -220,10 +223,10 @@ def _optimize_contrastive_group(
 ) -> tuple[torch.Tensor, float | None]:
     image_embedding = torch.cat(image_embedding_chunks, dim=0)
     spectrum_embedding = torch.cat(spectrum_embedding_chunks, dim=0)
-    loss = symmetric_clip_loss(
+    loss = _contrastive_loss(
         image_embedding,
         spectrum_embedding,
-        temperature=config.temperature,
+        config,
     )
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
@@ -253,10 +256,10 @@ def _evaluate(
     for batch in loader:
         tensor_batch = _to_device(batch, device)
         outputs = model(tensor_batch)
-        loss = symmetric_clip_loss(
+        loss = _contrastive_loss(
             outputs["image_embedding"],
             outputs["spectrum_embedding"],
-            temperature=config.temperature,
+            config,
         )
         losses.append(float(loss.item()))
         image_embeddings.append(outputs["image_embedding"].detach().cpu())
@@ -292,6 +295,41 @@ def _resolve_device(device: str) -> torch.device:
 def _validate_config(config: ContrastiveTrainConfig) -> None:
     if config.contrastive_accumulation_steps < 1:
         raise ValueError("contrastive_accumulation_steps must be >= 1")
+    if config.contrastive_loss not in {
+        "symmetric_info_nce",
+        "image_to_spectrum_info_nce",
+        "spectrum_to_image_info_nce",
+    }:
+        raise ValueError(
+            "contrastive_loss must be one of: symmetric_info_nce, "
+            "image_to_spectrum_info_nce, spectrum_to_image_info_nce"
+        )
+
+
+def _contrastive_loss(
+    image_embedding: torch.Tensor,
+    spectrum_embedding: torch.Tensor,
+    config: ContrastiveTrainConfig,
+) -> torch.Tensor:
+    if config.contrastive_loss == "symmetric_info_nce":
+        return symmetric_info_nce_loss(
+            image_embedding,
+            spectrum_embedding,
+            temperature=config.temperature,
+        )
+    if config.contrastive_loss == "image_to_spectrum_info_nce":
+        return info_nce_loss(
+            image_embedding,
+            spectrum_embedding,
+            temperature=config.temperature,
+        )
+    if config.contrastive_loss == "spectrum_to_image_info_nce":
+        return info_nce_loss(
+            spectrum_embedding,
+            image_embedding,
+            temperature=config.temperature,
+        )
+    raise ValueError(f"Unknown contrastive_loss {config.contrastive_loss!r}")
 
 
 def _limit(values: tuple[str, ...], max_items: int | None) -> tuple[str, ...]:

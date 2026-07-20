@@ -67,6 +67,8 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
   - `model.dropout`.
 - Entrenamiento/export contrastivo y diagnosticos post-hoc ahora reportan ranking mediano, MRR y percentiles de ranking en ambas direcciones (`image -> spectrum` y `spectrum -> image`), para separar "hay senal latente" de "retrieval@1 ya es confiable".
 - El trainer contrastivo acepta `train.contrastive_accumulation_steps` para calcular la loss sobre varios microbatches concatenados, aumentando el numero de negativos efectivos por paso de optimizacion sin cambiar el batch del dataloader.
+- La loss contrastiva queda nombrada explicitamente como `symmetric_info_nce`; la antigua `symmetric_clip_loss` se conserva como alias compatible porque los runs previos usaban la misma formulacion InfoNCE bidireccional.
+- El trainer acepta ablations direccionales con `train.contrastive_loss=image_to_spectrum_info_nce` y `train.contrastive_loss=spectrum_to_image_info_nce`.
 - Existe un agregador reproducible de runs contrastivos que cruza `summary.json` con `export_*/metrics.json` y permite comparar loss, margen, ranking mediano, MRR indirecto/top-k y batch efectivo sin revisar archivos manualmente.
 - El downstream de anomalias queda condicionado a tener primero un modelo contrastivo confiable, con validation estable, margen positivo-negativo sano, retrieval por encima del azar y reportes reproducibles desde `best.pt`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en el servidor remoto.

@@ -82,3 +82,19 @@ def test_info_nce_loss_is_directional_cross_entropy() -> None:
 
     assert torch.isfinite(loss)
     assert loss < 1e-4
+
+
+def test_info_nce_loss_accepts_trainable_temperature() -> None:
+    query_embedding = torch.eye(3)
+    target_embedding = torch.eye(3)
+    log_temperature = torch.nn.Parameter(torch.tensor(0.15).log())
+
+    loss = info_nce_loss(
+        query_embedding,
+        target_embedding,
+        temperature=log_temperature.exp(),
+    )
+    loss.backward()
+
+    assert log_temperature.grad is not None
+    assert torch.isfinite(log_temperature.grad)

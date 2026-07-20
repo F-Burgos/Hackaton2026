@@ -1,6 +1,6 @@
 # Hackaton2026 Project Status
 
-Ultima actualizacion: 2026-07-17
+Ultima actualizacion: 2026-07-20
 
 ## Estado Actual
 
@@ -70,7 +70,8 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - El trainer contrastivo acepta `train.contrastive_accumulation_steps` para calcular la loss sobre varios microbatches concatenados, aumentando el numero de negativos efectivos por paso de optimizacion sin cambiar el batch del dataloader.
 - La loss contrastiva queda nombrada explicitamente como `symmetric_info_nce`; la antigua `symmetric_clip_loss` se conserva como alias compatible porque los runs previos usaban la misma formulacion InfoNCE bidireccional.
 - El trainer acepta ablations direccionales con `train.contrastive_loss=image_to_spectrum_info_nce` y `train.contrastive_loss=spectrum_to_image_info_nce`.
-- `train.temperature` es un hiperparametro fijo de la loss InfoNCE; no se entrena como parametro del modelo en la implementacion actual.
+- `train.temperature` sigue siendo fijo por defecto, pero el trainer ahora acepta `train.temperature_trainable=true` para optimizar una temperatura InfoNCE aprendible parametrizada como `log_temperature`.
+- Las corridas contrastivas nuevas reportan `temperature_trainable` y la temperatura efectiva por epoca; los checkpoints guardan el valor aprendido de `log_temperature` cuando corresponde.
 - Existe un agregador reproducible de runs contrastivos que cruza `summary.json` con `export_*/metrics.json` y permite comparar loss, margen, ranking mediano, MRR indirecto/top-k y batch efectivo sin revisar archivos manualmente.
 - El downstream de anomalias queda condicionado a tener primero un modelo contrastivo confiable, con validation estable, margen positivo-negativo sano, retrieval por encima del azar y reportes reproducibles desde `best.pt`.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en el servidor remoto.

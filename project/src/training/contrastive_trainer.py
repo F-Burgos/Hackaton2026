@@ -47,6 +47,9 @@ class ContrastiveTrainConfig:
     encoder_variant: str = "simple"
     dropout: float = 0.0
     temperature: float = 0.07
+    temperature_trainable: bool = False
+    temperature_min: float = 0.01
+    temperature_max: float = 1.0
     seed: int = 42
     device: str = "auto"
     output_dir: str = "project/results/contrastive"
@@ -90,10 +93,23 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
             encoder_variant=config.encoder_variant,
             dropout=config.dropout,
         ).to(device)
+        log_temperature = _build_log_temperature(config, device)
+        optimizer_param_groups: list[dict[str, object]] = [
+            {
+                "params": list(model.parameters()),
+                "weight_decay": config.weight_decay,
+            }
+        ]
+        if log_temperature is not None:
+            optimizer_param_groups.append(
+                {
+                    "params": [log_temperature],
+                    "weight_decay": 0.0,
+                }
+            )
         optimizer = torch.optim.AdamW(
-            model.parameters(),
+            optimizer_param_groups,
             lr=config.learning_rate,
-            weight_decay=config.weight_decay,
         )
         scheduler = _build_scheduler(optimizer, config)
 
@@ -104,9 +120,17 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
         epochs_without_improvement = 0
         for epoch in range(1, config.epochs + 1):
             started = time()
-            train_metrics = _train_epoch(model, train_loader, optimizer, config, device)
-            val_metrics = _evaluate(model, val_loader, config, device)
+            train_metrics = _train_epoch(
+                model,
+                train_loader,
+                optimizer,
+                config,
+                device,
+                log_temperature,
+            )
+            val_metrics = _evaluate(model, val_loader, config, device, log_temperature)
             learning_rate = float(optimizer.param_groups[0]["lr"])
+            temperature = _temperature_float(config, log_temperature)
             latest_metrics = {
                 "epoch": epoch,
                 "seconds": round(time() - started, 3),
@@ -114,7 +138,8 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
                 "n_train": len(train_ids),
                 "n_val": len(val_ids),
                 "contrastive_loss": config.contrastive_loss,
-                "temperature": config.temperature,
+                "temperature": temperature,
+                "temperature_trainable": config.temperature_trainable,
                 "stopped_early": False,
                 **{f"train_{key}": value for key, value in train_metrics.items()},
                 **{f"val_{key}": value for key, value in val_metrics.items()},
@@ -128,6 +153,11 @@ def run_contrastive_training(config: ContrastiveTrainConfig) -> dict[str, float 
                     torch.save(
                         {
                             "model_state_dict": model.state_dict(),
+                            "log_temperature": (
+                                None
+                                if log_temperature is None
+                                else float(log_temperature.detach().cpu().item())
+                            ),
                             "config": asdict(config),
                             "metrics": latest_metrics,
                         },
@@ -162,6 +192,7 @@ def _train_epoch(
     optimizer: torch.optim.Optimizer,
     config: ContrastiveTrainConfig,
     device: torch.device,
+    log_temperature: torch.nn.Parameter | None,
 ) -> dict[str, float]:
     model.train()
     losses: list[float] = []
@@ -182,6 +213,7 @@ def _train_epoch(
             config,
             image_embedding_chunks,
             spectrum_embedding_chunks,
+            log_temperature,
         )
         optimizer_steps += 1
         image_embedding_chunks = []
@@ -196,6 +228,7 @@ def _train_epoch(
             config,
             image_embedding_chunks,
             spectrum_embedding_chunks,
+            log_temperature,
         )
         optimizer_steps += 1
         if grad_norm is not None:
@@ -220,6 +253,7 @@ def _optimize_contrastive_group(
     config: ContrastiveTrainConfig,
     image_embedding_chunks: list[torch.Tensor],
     spectrum_embedding_chunks: list[torch.Tensor],
+    log_temperature: torch.nn.Parameter | None,
 ) -> tuple[torch.Tensor, float | None]:
     image_embedding = torch.cat(image_embedding_chunks, dim=0)
     spectrum_embedding = torch.cat(spectrum_embedding_chunks, dim=0)
@@ -227,6 +261,7 @@ def _optimize_contrastive_group(
         image_embedding,
         spectrum_embedding,
         config,
+        log_temperature,
     )
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
@@ -247,6 +282,7 @@ def _evaluate(
     loader: DataLoader,
     config: ContrastiveTrainConfig,
     device: torch.device,
+    log_temperature: torch.nn.Parameter | None,
 ) -> dict[str, float]:
     model.eval()
     losses: list[float] = []
@@ -260,6 +296,7 @@ def _evaluate(
             outputs["image_embedding"],
             outputs["spectrum_embedding"],
             config,
+            log_temperature,
         )
         losses.append(float(loss.item()))
         image_embeddings.append(outputs["image_embedding"].detach().cpu())
@@ -304,32 +341,80 @@ def _validate_config(config: ContrastiveTrainConfig) -> None:
             "contrastive_loss must be one of: symmetric_info_nce, "
             "image_to_spectrum_info_nce, spectrum_to_image_info_nce"
         )
+    if config.temperature <= 0:
+        raise ValueError("temperature must be > 0")
+    if config.temperature_min <= 0:
+        raise ValueError("temperature_min must be > 0")
+    if config.temperature_max <= config.temperature_min:
+        raise ValueError("temperature_max must be greater than temperature_min")
+    if config.temperature_trainable and not (
+        config.temperature_min <= config.temperature <= config.temperature_max
+    ):
+        raise ValueError(
+            "trainable initial temperature must be within "
+            "[temperature_min, temperature_max]"
+        )
 
 
 def _contrastive_loss(
     image_embedding: torch.Tensor,
     spectrum_embedding: torch.Tensor,
     config: ContrastiveTrainConfig,
+    log_temperature: torch.nn.Parameter | None,
 ) -> torch.Tensor:
+    temperature = _temperature_tensor(config, log_temperature, image_embedding.device)
     if config.contrastive_loss == "symmetric_info_nce":
         return symmetric_info_nce_loss(
             image_embedding,
             spectrum_embedding,
-            temperature=config.temperature,
+            temperature=temperature,
         )
     if config.contrastive_loss == "image_to_spectrum_info_nce":
         return info_nce_loss(
             image_embedding,
             spectrum_embedding,
-            temperature=config.temperature,
+            temperature=temperature,
         )
     if config.contrastive_loss == "spectrum_to_image_info_nce":
         return info_nce_loss(
             spectrum_embedding,
             image_embedding,
-            temperature=config.temperature,
+            temperature=temperature,
         )
     raise ValueError(f"Unknown contrastive_loss {config.contrastive_loss!r}")
+
+
+def _build_log_temperature(
+    config: ContrastiveTrainConfig,
+    device: torch.device,
+) -> torch.nn.Parameter | None:
+    if not config.temperature_trainable:
+        return None
+    initial = torch.tensor(config.temperature, device=device).log()
+    return torch.nn.Parameter(initial)
+
+
+def _temperature_tensor(
+    config: ContrastiveTrainConfig,
+    log_temperature: torch.nn.Parameter | None,
+    device: torch.device,
+) -> float | torch.Tensor:
+    if log_temperature is None:
+        return config.temperature
+    return log_temperature.exp().clamp(
+        min=config.temperature_min,
+        max=config.temperature_max,
+    ).to(device)
+
+
+def _temperature_float(
+    config: ContrastiveTrainConfig,
+    log_temperature: torch.nn.Parameter | None,
+) -> float:
+    temperature = _temperature_tensor(config, log_temperature, torch.device("cpu"))
+    if isinstance(temperature, torch.Tensor):
+        return float(temperature.detach().cpu().item())
+    return float(temperature)
 
 
 def _limit(values: tuple[str, ...], max_items: int | None) -> tuple[str, ...]:

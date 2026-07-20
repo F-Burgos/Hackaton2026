@@ -22,3 +22,15 @@ def test_contrastive_loss_name_must_be_supported() -> None:
 
     with pytest.raises(ValueError, match="contrastive_loss"):
         _validate_config(config)
+
+
+def test_trainable_temperature_initial_value_must_be_inside_bounds() -> None:
+    config = ContrastiveTrainConfig(
+        temperature=0.005,
+        temperature_trainable=True,
+        temperature_min=0.01,
+        temperature_max=1.0,
+    )
+
+    with pytest.raises(ValueError, match="initial temperature"):
+        _validate_config(config)

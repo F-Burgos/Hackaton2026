@@ -22,6 +22,7 @@ SUMMARY_COLUMNS = [
     "stopped_early",
     "contrastive_loss",
     "temperature",
+    "temperature_trainable",
     "accumulation_steps",
     "effective_batch_size",
     "best_val_loss",
@@ -47,6 +48,7 @@ MARKDOWN_COLUMNS = [
     "best_epoch",
     "contrastive_loss",
     "temperature",
+    "temperature_trainable",
     "best_val_loss",
     "best_val_margin",
     "export_i2s_recall@1",
@@ -139,6 +141,10 @@ def _row_from_metrics(
         "stopped_early": summary.get("stopped_early", ""),
         "contrastive_loss": summary.get("best_contrastive_loss", summary.get("contrastive_loss", "")),
         "temperature": summary.get("best_temperature", summary.get("temperature", "")),
+        "temperature_trainable": summary.get(
+            "best_temperature_trainable",
+            summary.get("temperature_trainable", False),
+        ),
         "accumulation_steps": summary.get(
             "best_train_contrastive_accumulation_steps",
             summary.get("train_contrastive_accumulation_steps", 1),

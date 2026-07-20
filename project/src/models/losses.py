@@ -7,7 +7,7 @@ from torch.nn import functional as F
 def info_nce_loss(
     query_embedding: torch.Tensor,
     target_embedding: torch.Tensor,
-    temperature: float = 0.07,
+    temperature: float | torch.Tensor = 0.07,
 ) -> torch.Tensor:
     logits = _paired_logits(query_embedding, target_embedding, temperature)
     labels = torch.arange(logits.shape[0], device=logits.device)
@@ -17,7 +17,7 @@ def info_nce_loss(
 def symmetric_info_nce_loss(
     image_embedding: torch.Tensor,
     spectrum_embedding: torch.Tensor,
-    temperature: float = 0.07,
+    temperature: float | torch.Tensor = 0.07,
 ) -> torch.Tensor:
     logits = _paired_logits(image_embedding, spectrum_embedding, temperature)
     labels = torch.arange(logits.shape[0], device=logits.device)
@@ -29,7 +29,7 @@ def symmetric_info_nce_loss(
 def symmetric_clip_loss(
     image_embedding: torch.Tensor,
     spectrum_embedding: torch.Tensor,
-    temperature: float = 0.07,
+    temperature: float | torch.Tensor = 0.07,
 ) -> torch.Tensor:
     return symmetric_info_nce_loss(image_embedding, spectrum_embedding, temperature)
 
@@ -37,7 +37,7 @@ def symmetric_clip_loss(
 def _paired_logits(
     query_embedding: torch.Tensor,
     target_embedding: torch.Tensor,
-    temperature: float,
+    temperature: float | torch.Tensor,
 ) -> torch.Tensor:
     if query_embedding.shape != target_embedding.shape:
         raise ValueError(
@@ -46,7 +46,12 @@ def _paired_logits(
         )
     if query_embedding.ndim != 2:
         raise ValueError(f"Expected 2D embeddings, got {query_embedding.ndim}D")
-    if temperature <= 0:
+    temperature_value = (
+        float(temperature.detach().item())
+        if isinstance(temperature, torch.Tensor)
+        else float(temperature)
+    )
+    if temperature_value <= 0:
         raise ValueError(f"temperature must be > 0, got {temperature}")
     return query_embedding @ target_embedding.T / temperature
 

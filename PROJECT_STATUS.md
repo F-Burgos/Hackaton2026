@@ -42,6 +42,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/reports/contrastive_progress_report.md`: reporte agregado del estado contrastivo y gate hacia downstream.
 - `project/reports/contrastive_run_summary.csv`: resumen tabular versionado de metricas contrastivas.
 - `project/reports/contrastive_run_summary.md`: resumen Markdown versionado de metricas contrastivas.
+- `project/reports/contrastive_hpo_20260720.md`: reporte focal de HPO sobre temperatura, learning rate y loss.
 - `tests/`: pruebas de acceso a datos y forward/loss.
 
 ## Cambios Recientes
@@ -117,6 +118,15 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
     - `temp=0.07`: reproduce el run acumulado medio, validation loss `3.0992`, margen `0.0881`;
     - `temp=0.10`: validation loss `3.1110`, margen `0.1490`, test i2s/s2i median rank `934` / `945`;
     - conclusion: `temp=0.10` recupera margen y mejora ranking test, por lo que es el candidato mas razonable para escalar con acumulacion; downstream sigue bloqueado.
+  - HPO sobre learning rate, temperatura y loss:
+    - sweep dir: `project/results/contrastive/hpo_loss_lr_temp_20260720_1320`;
+    - configs: `3` learning rates x `2` temperaturas x `3` losses = `18` corridas;
+    - learning rates: `0.0001`, `0.0003`, `0.001`;
+    - temperaturas: `0.10`, `0.15`;
+    - losses: `symmetric_info_nce`, `image_to_spectrum_info_nce`, `spectrum_to_image_info_nce`;
+    - mejor configuracion balanceada: `lr1e3_temp015_sym`;
+    - `lr1e3_temp015_sym`: best val loss `3.0558`, test margin `0.2088`, test i2s/s2i median rank `893` / `909`;
+    - conclusion: `lr=0.001`, `temp=0.15`, `symmetric_info_nce` es el mejor candidato actual para una corrida larga; las losses direccionales mejoran una direccion pero desequilibran la otra.
   - Diagnosticos de ranking del run `long_simple_pat20_20260717_140310`:
     - validation `n=8192`: i2s median rank `1587`, s2i median rank `1638`, i2s MRR `0.004293`, s2i MRR `0.003858`;
     - full test `n=6586`: i2s median rank `774`, s2i median rank `764`, i2s MRR `0.008256`, s2i MRR `0.008232`;

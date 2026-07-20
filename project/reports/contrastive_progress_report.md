@@ -203,6 +203,32 @@ Resultados exportados desde `best.pt`:
 
 La temperatura `0.03` optimiza levemente la validation loss, pero deja un margen demasiado bajo. La temperatura `0.10` sacrifica un poco de validation loss y validation rank, pero mejora el margen y el ranking mediano en test. Para el siguiente run escalado con acumulacion, `temp=0.10` es el candidato mas defendible.
 
+## HPO Learning Rate, Temperatura y Loss
+
+Sweep:
+
+`project/results/contrastive/hpo_loss_lr_temp_20260720_1320`
+
+Grilla:
+
+- learning rates: `0.0001`, `0.0003`, `0.001`;
+- temperaturas: `0.10`, `0.15`;
+- losses: `symmetric_info_nce`, `image_to_spectrum_info_nce`, `spectrum_to_image_info_nce`;
+- train/validation: `16384` / `4096`;
+- batch contrastivo efectivo: `128`.
+
+Top configuraciones:
+
+| Run | Loss | Best val loss | Test margin | Test i2s median rank | Test s2i median rank |
+|---|---|---:|---:|---:|---:|
+| `lr1e3_temp015_sym` | `symmetric_info_nce` | 3.055827 | 0.208777 | 893 | 909 |
+| `lr1e3_temp015_i2s` | `image_to_spectrum_info_nce` | 3.058553 | 0.223026 | 881 | 998 |
+| `lr1e3_temp015_s2i` | `spectrum_to_image_info_nce` | 3.063707 | 0.229491 | 1086 | 930 |
+| `lr3e4_temp015_sym` | `symmetric_info_nce` | 3.115570 | 0.208957 | 933 | 949 |
+| `lr1e3_temp010_sym` | `symmetric_info_nce` | 3.091872 | 0.156750 | 938 | 934 |
+
+El learning rate `0.001` fue estable y mejoro claramente el frente de Pareto loss/margen/ranking. Las losses direccionales maximizan una direccion a costa de la otra. Para un espacio latente multimodal equilibrado, el mejor candidato actual es `lr1e3_temp015_sym`: `train.learning_rate=0.001`, `train.temperature=0.15`, `train.contrastive_loss=symmetric_info_nce`.
+
 ## Interpretacion
 
 Los runs largos aprenden una separacion positiva-negativa real: la similitud media de pares correctos supera a la similitud media de negativos por aproximadamente `0.109` en validation y `0.232` en test.
@@ -259,3 +285,7 @@ El siguiente bloque debe concentrarse en mejorar el modelo contrastivo o sus obj
 - `project/results/contrastive/accum_temp_sweep_20260717_1918/temp010/summary.json`
 - `project/results/contrastive/accum_temp_sweep_20260717_1918/temp010/export_val4096/metrics.json`
 - `project/results/contrastive/accum_temp_sweep_20260717_1918/temp010/export_test4096/metrics.json`
+- `project/results/contrastive/hpo_loss_lr_temp_20260720_1320/*/summary.json`
+- `project/results/contrastive/hpo_loss_lr_temp_20260720_1320/*/export_val4096/metrics.json`
+- `project/results/contrastive/hpo_loss_lr_temp_20260720_1320/*/export_test4096/metrics.json`
+- `project/reports/contrastive_hpo_20260720.md`

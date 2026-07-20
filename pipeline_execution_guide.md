@@ -216,6 +216,9 @@ Loss contrastivas soportadas:
 - `image_to_spectrum_info_nce`: InfoNCE direccional imagen->espectro.
 - `spectrum_to_image_info_nce`: InfoNCE direccional espectro->imagen.
 
+`train.temperature` se trata como hiperparametro fijo. No se entrena como parametro
+del modelo en la implementacion actual.
+
 Variante opcional de encoders con bloques residuales:
 
 ```bash

@@ -1,10 +1,10 @@
 # Hackaton2026 Project Status
 
-Ultima actualizacion: 2026-07-20
+Ultima actualizacion: 2026-07-22
 
 ## Estado Actual
 
-Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya existen utilidades de acceso lazy a datos, filtrado de particiones, smoke tests SSL/contrastive, entrenamiento contrastivo base, metricas retrieval, export de embeddings por split y diagnosticos ligeros del espacio latente. Todavia no hay HPO, entrenamiento largo, reportes cientificos finales ni downstream de anomalias implementado.
+Estamos pasando desde entrenamiento contrastivo base hacia downstream exploratorio de anomalias. Ya existen utilidades de acceso lazy a datos, filtrado de particiones, entrenamiento/export contrastivo, metricas retrieval, diagnosticos ligeros del espacio latente, HPO contrastivo y una primera infraestructura downstream para mapeo crossmodal e inyeccion sintetica de anomalias en test. Todavia faltan resultados downstream validados y reportes cientificos finales.
 
 ## Decisiones Tomadas
 
@@ -18,7 +18,7 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - En el servidor remoto, el codigo debe actualizarse mediante `git pull`; no se editaran archivos directamente alla.
 - El entorno comun del proyecto sigue lo que el servidor remoto puede ejecutar: Python 3.10, `uv`, `.venv` local al repo y `--system-site-packages` para reutilizar PyTorch/CUDA del sistema.
 - El downstream principal sera investigacion de anomalias en el espacio latente multimodal.
-- Crossmodal feature mapping queda como follow-up, no como primera version.
+- Crossmodal feature mapping pasa a ser la primera version downstream experimental, usando mapeadores sobre embeddings contrastivos congelados.
 - El objetivo amplio post-hackaton incluye estudiar como integrar agentes y modelos de lenguaje en la investigacion cientifica, manteniendo trazabilidad, reproducibilidad y juicio cientifico humano.
 - Codex debe entregar reportes de progreso frecuentes durante trabajo local, ejecuciones remotas, experimentos y cambios de direccion.
 
@@ -39,6 +39,10 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - `project/scripts/sh/diagnose_embeddings.sh`: diagnosticos PCA/kNN/prefijos sobre embeddings exportados, sin downstream.
 - `project/scripts/sh/ranking_diagnostics.sh`: diagnosticos de ranking mediano/MRR desde embeddings exportados.
 - `project/scripts/sh/summarize_contrastive_runs.sh`: tabla agregada CSV/Markdown de runs contrastivos versionados.
+- `project/scripts/sh/train_crossmodal_mapper.sh`: entrenamiento downstream de mapeadores crossmodal congelando el contrastivo.
+- `project/scripts/sh/evaluate_downstream_anomalies.sh`: evaluacion downstream con anomalias sinteticas inyectadas en test.
+- `project/configs/downstream/crossmodal.yaml`: configuracion inicial para entrenamiento crossmodal y evaluacion de anomalias.
+- `project/src/downstream/`: inyeccion sintetica de anomalias, entrenamiento de mapeadores crossmodal y evaluacion downstream.
 - `project/reports/contrastive_progress_report.md`: reporte agregado del estado contrastivo y gate hacia downstream.
 - `project/reports/contrastive_run_summary.csv`: resumen tabular versionado de metricas contrastivas.
 - `project/reports/contrastive_run_summary.md`: resumen Markdown versionado de metricas contrastivas.
@@ -72,8 +76,16 @@ Estamos en fase de preparacion tecnica y entrenamiento contrastivo base. Ya exis
 - El trainer acepta ablations direccionales con `train.contrastive_loss=image_to_spectrum_info_nce` y `train.contrastive_loss=spectrum_to_image_info_nce`.
 - `train.temperature` sigue siendo fijo por defecto, pero el trainer ahora acepta `train.temperature_trainable=true` para optimizar una temperatura InfoNCE aprendible parametrizada como `log_temperature`.
 - Las corridas contrastivas nuevas reportan `temperature_trainable` y la temperatura efectiva por epoca; los checkpoints guardan el valor aprendido de `log_temperature` cuando corresponde.
+- Se preparo la primera version downstream crossmodal:
+  - congelar el modelo contrastivo;
+  - entrenar dos mapeadores MLP `image -> spectrum_embedding` y `spectrum -> image_embedding`;
+  - usar discrepancias de mapeo y distancia directa imagen-espectro como anomaly scores;
+  - inyectar anomalías sinteticas reproducibles en memoria, solo durante evaluacion de test.
+- Modos iniciales de anomalía implementados:
+  - imagen: `bright_patch`, `dark_patch`, `noise_patch`, `channel_dropout`;
+  - espectro: `spike`, `segment_shift`, `segment_noise`, `continuum_tilt`.
 - Existe un agregador reproducible de runs contrastivos que cruza `summary.json` con `export_*/metrics.json` y permite comparar loss, margen, ranking mediano, MRR indirecto/top-k y batch efectivo sin revisar archivos manualmente.
-- El downstream de anomalias queda condicionado a tener primero un modelo contrastivo confiable, con validation estable, margen positivo-negativo sano, retrieval por encima del azar y reportes reproducibles desde `best.pt`.
+- El downstream de anomalias queda habilitado como exploratorio, no como claim final: el espacio contrastivo muestra margen y ranking por encima del azar, pero retrieval exacto sigue bajo.
 - Esta mejora busca reducir sensibilidad a escala instrumental y facilitar diagnosticos de runs antes de escalar en el servidor remoto.
 
 ## Validaciones Recientes

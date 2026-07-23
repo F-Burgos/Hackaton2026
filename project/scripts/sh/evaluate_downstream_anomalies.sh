@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+cd "${ROOT_DIR}"
+source project/scripts/sh/_python.sh
+
+"$(resolve_project_python)" project/scripts/evaluate_downstream_anomalies.py "$@"

@@ -1,0 +1,46 @@
+run:
+  mode: dry_run
+  task: downstream_crossmodal
+  seed: 42
+
+data:
+  root: hackaton
+  fold: 0
+  batch_size: 64
+  num_workers: 0
+
+contrastive:
+  checkpoint_path: project/results/contrastive/trainable_temp_long_20260720_1410/best.pt
+
+mapper:
+  hidden_dim: 256
+  num_layers: 2
+  dropout: 0.0
+
+train:
+  epochs: 20
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  max_train_samples: 4096
+  max_val_samples: 1024
+  early_stopping_patience: 5
+  early_stopping_min_delta: 0.0
+
+anomaly:
+  fraction: 0.10
+  seed: 42
+  modality: alternate
+  image_kind: bright_patch
+  spectrum_kind: spike
+  strength: 5.0
+
+resources:
+  device: auto
+
+outputs:
+  crossmodal_dir: project/results/downstream/crossmodal_mapper/dry_run
+  anomaly_dir: project/results/downstream/anomaly_eval/dry_run
+
+eval:
+  mapper_checkpoint_path: project/results/downstream/crossmodal_mapper/dry_run/best.pt
+  max_samples: 1024

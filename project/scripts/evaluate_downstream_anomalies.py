@@ -30,6 +30,7 @@ def main() -> None:
         contrastive_checkpoint_path=str(cfg.contrastive.checkpoint_path),
         mapper_checkpoint_path=_optional_str(cfg.eval.mapper_checkpoint_path),
         data_root=str(cfg.data.root),
+        fold=int(cfg.data.fold),
         batch_size=int(cfg.data.batch_size),
         num_workers=int(cfg.data.num_workers),
         max_samples=_optional_int(cfg.eval.max_samples),
@@ -39,6 +40,8 @@ def main() -> None:
         image_anomaly_kind=str(cfg.anomaly.image_kind),
         spectrum_anomaly_kind=str(cfg.anomaly.spectrum_kind),
         anomaly_strength=float(cfg.anomaly.strength),
+        threshold_calibration_split=str(cfg.threshold.calibration_split),
+        threshold_fpr=float(cfg.threshold.fpr),
         device=str(cfg.resources.device),
         output_dir=str(cfg.outputs.anomaly_dir),
     )

@@ -11,7 +11,7 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 from torch.utils.data import DataLoader
 
 from project.src.data.hdf5_index import Hdf5KeyIndex
-from project.src.data.partitions import load_test
+from project.src.data.partitions import load_fold, load_test
 from project.src.data.paths import DataPaths
 from project.src.data.torch_datasets import TorchMultimodalPairDataset, multimodal_collate
 from project.src.downstream.anomalies import (
@@ -28,6 +28,7 @@ class DownstreamAnomalyConfig:
     contrastive_checkpoint_path: str
     mapper_checkpoint_path: str | None = None
     data_root: str = "hackaton"
+    fold: int = 0
     batch_size: int = 64
     num_workers: int = 0
     max_samples: int | None = None
@@ -37,6 +38,8 @@ class DownstreamAnomalyConfig:
     image_anomaly_kind: str = "bright_patch"
     spectrum_anomaly_kind: str = "spike"
     anomaly_strength: float = 5.0
+    threshold_calibration_split: str = "val"
+    threshold_fpr: float = 0.05
     device: str = "auto"
     output_dir: str = "project/results/downstream/anomaly_eval"
 
@@ -53,6 +56,12 @@ def evaluate_downstream_anomalies(
 
     paths = DataPaths.from_root(config.data_root)
     index = Hdf5KeyIndex.from_paths(paths)
+    calibration_ids = _select_split(
+        paths,
+        index.paired_keys,
+        split=config.threshold_calibration_split,
+        fold=config.fold,
+    )
     object_ids = load_test(paths.partitions_dir).filter(index.paired_keys).all
     if config.max_samples is not None:
         object_ids = object_ids[: config.max_samples]
@@ -69,14 +78,75 @@ def evaluate_downstream_anomalies(
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    calibration_rows = _score_split(
+        object_ids=calibration_ids,
+        paths=paths,
+        batch_size=config.batch_size,
+        num_workers=config.num_workers,
+        contrastive_model=contrastive_model,
+        mapper=mapper,
+        device=device,
+        manifest={},
+    )
+    thresholds = _thresholds_from_nominal(calibration_rows, config.threshold_fpr)
+    rows = _score_split(
+        object_ids=object_ids,
+        paths=paths,
+        batch_size=config.batch_size,
+        num_workers=config.num_workers,
+        contrastive_model=contrastive_model,
+        mapper=mapper,
+        device=device,
+        manifest=manifest,
+    )
+    _add_threshold_predictions(rows, thresholds)
+
+    metrics = _classification_metrics(rows)
+    metrics.update(_threshold_metrics(rows, thresholds))
+    metrics.update(
+        {
+            "n_objects": len(rows),
+            "n_anomalies": sum(int(row["label"]) for row in rows),
+            "anomaly_fraction": config.anomaly_fraction,
+            "anomaly_seed": config.anomaly_seed,
+            "anomaly_modality": config.anomaly_modality,
+            "image_anomaly_kind": config.image_anomaly_kind,
+            "spectrum_anomaly_kind": config.spectrum_anomaly_kind,
+            "anomaly_strength": config.anomaly_strength,
+            "threshold_calibration_split": config.threshold_calibration_split,
+            "threshold_fpr": config.threshold_fpr,
+            "contrastive_checkpoint_path": config.contrastive_checkpoint_path,
+            "mapper_checkpoint_path": config.mapper_checkpoint_path or "",
+        }
+    )
+    _write_rows(output_dir / "scores.csv", rows)
+    _write_rows(output_dir / "calibration_scores.csv", calibration_rows)
+    _write_json(output_dir / "thresholds.json", thresholds)
+    _write_json(output_dir / "manifest.json", {key: spec.to_dict() for key, spec in manifest.items()})
+    _write_json(output_dir / "metrics.json", metrics)
+    _write_json(output_dir / "config.json", asdict(config))
+    print(_format_metrics(metrics), flush=True)
+    return metrics
+
+
+def _score_split(
+    object_ids: tuple[str, ...],
+    paths: DataPaths,
+    batch_size: int,
+    num_workers: int,
+    contrastive_model: ContrastiveModel,
+    mapper: CrossModalMapper | None,
+    device: torch.device,
+    manifest: dict[str, AnomalySpec],
+) -> list[dict[str, str | float | int]]:
     dataset = TorchMultimodalPairDataset(object_ids, paths.images_h5, paths.spectra_h5)
     rows: list[dict[str, str | float | int]] = []
     try:
         loader = DataLoader(
             dataset,
-            batch_size=config.batch_size,
+            batch_size=batch_size,
             shuffle=False,
-            num_workers=config.num_workers,
+            num_workers=num_workers,
             collate_fn=multimodal_collate,
         )
         with torch.no_grad():
@@ -106,28 +176,7 @@ def evaluate_downstream_anomalies(
                     )
     finally:
         dataset.close()
-
-    metrics = _classification_metrics(rows)
-    metrics.update(
-        {
-            "n_objects": len(rows),
-            "n_anomalies": sum(int(row["label"]) for row in rows),
-            "anomaly_fraction": config.anomaly_fraction,
-            "anomaly_seed": config.anomaly_seed,
-            "anomaly_modality": config.anomaly_modality,
-            "image_anomaly_kind": config.image_anomaly_kind,
-            "spectrum_anomaly_kind": config.spectrum_anomaly_kind,
-            "anomaly_strength": config.anomaly_strength,
-            "contrastive_checkpoint_path": config.contrastive_checkpoint_path,
-            "mapper_checkpoint_path": config.mapper_checkpoint_path or "",
-        }
-    )
-    _write_rows(output_dir / "scores.csv", rows)
-    _write_json(output_dir / "manifest.json", {key: spec.to_dict() for key, spec in manifest.items()})
-    _write_json(output_dir / "metrics.json", metrics)
-    _write_json(output_dir / "config.json", asdict(config))
-    print(_format_metrics(metrics), flush=True)
-    return metrics
+    return rows
 
 
 def _score_batch(
@@ -173,6 +222,62 @@ def _classification_metrics(rows: list[dict[str, str | float | int]]) -> dict[st
     return metrics
 
 
+def _thresholds_from_nominal(
+    calibration_rows: list[dict[str, str | float | int]],
+    target_fpr: float,
+) -> dict[str, float]:
+    if not 0.0 < target_fpr < 1.0:
+        raise ValueError(f"threshold_fpr must be in (0, 1), got {target_fpr}")
+    thresholds: dict[str, float] = {}
+    for score_name in _score_names(calibration_rows):
+        scores = np.asarray([float(row[score_name]) for row in calibration_rows])
+        thresholds[score_name] = float(np.quantile(scores, 1.0 - target_fpr))
+    return thresholds
+
+
+def _add_threshold_predictions(
+    rows: list[dict[str, str | float | int]],
+    thresholds: dict[str, float],
+) -> None:
+    for row in rows:
+        for score_name, threshold in thresholds.items():
+            row[f"{score_name}_threshold"] = threshold
+            row[f"{score_name}_is_anomaly"] = int(float(row[score_name]) > threshold)
+
+
+def _threshold_metrics(
+    rows: list[dict[str, str | float | int]],
+    thresholds: dict[str, float],
+) -> dict[str, float]:
+    labels = np.asarray([int(row["label"]) for row in rows])
+    metrics: dict[str, float] = {}
+    for score_name, threshold in thresholds.items():
+        predictions = np.asarray([int(row[f"{score_name}_is_anomaly"]) for row in rows])
+        tp = float(((predictions == 1) & (labels == 1)).sum())
+        fp = float(((predictions == 1) & (labels == 0)).sum())
+        tn = float(((predictions == 0) & (labels == 0)).sum())
+        fn = float(((predictions == 0) & (labels == 1)).sum())
+        metrics[f"{score_name}_threshold"] = threshold
+        metrics[f"{score_name}_threshold_precision"] = _safe_divide(tp, tp + fp)
+        metrics[f"{score_name}_threshold_recall"] = _safe_divide(tp, tp + fn)
+        metrics[f"{score_name}_threshold_fpr"] = _safe_divide(fp, fp + tn)
+        metrics[f"{score_name}_threshold_predicted_fraction"] = _safe_divide(
+            tp + fp,
+            len(rows),
+        )
+    return metrics
+
+
+def _score_names(rows: list[dict[str, str | float | int]]) -> list[str]:
+    if not rows:
+        return []
+    return [
+        key
+        for key in rows[0]
+        if key.endswith("score") or key.endswith("distance") or key.endswith("error")
+    ]
+
+
 def _recall_at_fpr(labels: np.ndarray, scores: np.ndarray, max_fpr: float) -> float:
     normal_scores = scores[labels == 0]
     anomaly_scores = scores[labels == 1]
@@ -180,6 +285,28 @@ def _recall_at_fpr(labels: np.ndarray, scores: np.ndarray, max_fpr: float) -> fl
         return float("nan")
     threshold = np.quantile(normal_scores, 1.0 - max_fpr)
     return float((anomaly_scores >= threshold).mean())
+
+
+def _safe_divide(numerator: float, denominator: float) -> float:
+    if denominator == 0:
+        return float("nan")
+    return float(numerator / denominator)
+
+
+def _select_split(
+    paths: DataPaths,
+    paired_keys: frozenset[str],
+    split: str,
+    fold: int,
+) -> tuple[str, ...]:
+    if split == "test":
+        return load_test(paths.partitions_dir).filter(paired_keys).all
+    partition = load_fold(paths.partitions_dir, fold=fold)
+    if split == "train":
+        return partition.train.filter(paired_keys).all
+    if split == "val":
+        return partition.val.filter(paired_keys).all
+    raise ValueError(f"Unknown split {split!r}; expected train, val, or test")
 
 
 def _load_contrastive_model(

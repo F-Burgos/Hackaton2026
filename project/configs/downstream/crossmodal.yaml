@@ -34,6 +34,10 @@ anomaly:
   spectrum_kind: spike
   strength: 5.0
 
+threshold:
+  calibration_split: val
+  fpr: 0.05
+
 resources:
   device: auto
 

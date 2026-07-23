@@ -281,18 +281,19 @@ Estado operativo reciente: GPU libre despues de las validaciones, solo Xorg/gnom
 
 Siguiente bloque recomendado:
 
-1. Mejorar el entrenamiento/modelo contrastivo base:
-   - revisar capacidad de encoders;
-   - probar batch contrastivo efectivo mediante `train.contrastive_accumulation_steps`;
-   - considerar hard negatives o memoria de negativos si la acumulacion no mejora ranking;
-   - revisar normalizacion por canal/modalidad.
-2. Enriquecer diagnosticos no-downstream con estratificacion por cobertura espectral/canales validos.
-3. Exportar embeddings de validation/test filtrados desde checkpoints realmente competitivos.
-4. Recien despues pasar al analisis latente orientado a anomalias.
+1. Validar con smoke el pipeline downstream crossmodal:
+   - entrenamiento de mapeadores sobre embeddings congelados;
+   - evaluacion con anomalías sinteticas en test;
+   - comparacion `pair_cosine_distance` vs. scores de mapeo crossmodal.
+2. Versionar reportes livianos del run con temperatura entrenable y del sweep de temperaturas literales cuando terminen.
+3. Comparar downstream usando:
+   - mejor checkpoint con temperatura fija;
+   - mejor checkpoint con temperatura entrenable;
+   - barrido de severidad de anomalias.
+4. Mantener el downstream como exploratorio hasta tener AUROC/AUPRC, controles de severidad y ejemplos cualitativos.
 
 ## No Hacer Todavia
 
-- No implementar downstream de anomalias.
 - No modificar HDF5 originales.
 - No lanzar jobs en el servidor remoto si hay GPU/procesos activos sin confirmacion.
 - No editar codigo directamente en el servidor remoto.

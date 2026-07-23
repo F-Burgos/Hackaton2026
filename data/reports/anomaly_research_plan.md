@@ -1,7 +1,7 @@
 # Multimodal Latent-Space Anomaly Research Plan
 
 Fecha: 2026-07-14  
-Estado: definicion cientifica y tecnica inicial. No implementar todavia.
+Estado: definicion cientifica y tecnica inicial; implementacion downstream crossmodal preparada para smoke/experimentos.
 
 ## Objetivo Cientifico
 
@@ -222,6 +222,13 @@ Scores de follow-up:
 - discrepancia espectro -> imagen via MLP de mapeo;
 - producto o media geometrica de discrepancias bidireccionales;
 - calibracion por prefijo/survey para evitar que el score mida dominio en lugar de anomalia.
+
+Estado de implementacion:
+
+- `project/src/downstream/crossmodal_training.py` entrena los MLPs bidireccionales sobre embeddings congelados.
+- `project/src/downstream/anomaly_evaluation.py` evalua scores de discrepancia con anomalías sinteticas en test.
+- `project/src/downstream/anomalies.py` genera un manifest reproducible y aplica perturbaciones en memoria, sin escribir HDF5.
+- La primera metrica principal sera AUROC/AUPRC para `crossmodal_mapping_distance`, comparada contra `pair_distance`.
 
 ## Anomalias Sinteticas Candidatas
 

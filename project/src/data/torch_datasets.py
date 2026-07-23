@@ -35,9 +35,17 @@ def multimodal_collate(
     fluxes: list[torch.Tensor] = []
     spectrum_masks: list[torch.Tensor] = []
     waves: list[torch.Tensor] = []
+    is_anomaly: list[bool] = []
+    anomaly_modalities: list[str] = []
+    anomaly_kinds: list[str] = []
+    has_anomaly_fields = any("is_anomaly" in sample for sample in samples)
 
     for sample in samples:
         object_ids.append(str(sample["object_id"]))
+        if has_anomaly_fields:
+            is_anomaly.append(bool(sample.get("is_anomaly", False)))
+            anomaly_modalities.append(str(sample.get("anomaly_modality", "none")))
+            anomaly_kinds.append(str(sample.get("anomaly_kind", "none")))
 
         image = _expect_tensor(sample["img"])
         image_mask = _expect_tensor(sample["img_channel_mask"])
@@ -55,7 +63,7 @@ def multimodal_collate(
         spectrum_masks.append(_expect_tensor(sample["mask_spectra"]).float())
         waves.append(_expect_tensor(sample["wave"]).float())
 
-    return {
+    batch: dict[str, torch.Tensor | list[str]] = {
         "object_id": object_ids,
         "img": torch.stack(images),
         "img_channel_mask": torch.stack(image_masks),
@@ -63,6 +71,11 @@ def multimodal_collate(
         "mask_spectra": torch.stack(spectrum_masks),
         "wave": torch.stack(waves),
     }
+    if has_anomaly_fields:
+        batch["is_anomaly"] = torch.tensor(is_anomaly, dtype=torch.bool)
+        batch["anomaly_modality"] = anomaly_modalities
+        batch["anomaly_kind"] = anomaly_kinds
+    return batch
 
 
 def _expect_tensor(value: torch.Tensor | str) -> torch.Tensor:
